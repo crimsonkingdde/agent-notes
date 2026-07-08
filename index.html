@@ -355,7 +355,7 @@ async function sendMsg(){
   const typing=msgs.insertAdjacentHTML('beforeend','<div class="chat-typing" id="typing">思考中...</div>');
   msgs.scrollTop=msgs.scrollHeight;
   try{
-    const apiUrl='https://agent-chat-api.vercel.app/api/chat';
+    const apiUrl='https://agent-notes-ten.vercel.app/api/chat';
     const resp=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:msg}]})});
     if(!resp.ok){const err=await resp.json();throw new Error(err.error||'请求失败')}
     document.getElementById('typing')?.remove();
