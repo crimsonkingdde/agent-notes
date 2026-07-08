@@ -23,6 +23,18 @@ header nav a:hover{color:var(--accent)}
 .section-title{font-size:22px;font-weight:700;color:#fff;margin:48px 0 24px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:48px}
 .post-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px;text-decoration:none;transition:border-color .2s;display:block}
+.project-showcase{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:1px solid var(--border);border-radius:12px;padding:32px;margin:48px 0;position:relative;overflow:hidden}
+.project-showcase::before{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle,rgba(88,166,255,.15) 0%,transparent 70%);pointer-events:none}
+.project-showcase .project-badge{display:inline-block;background:rgba(88,166,255,.15);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px}
+.project-showcase h2{font-size:24px;color:#fff;margin-bottom:12px;border:none;padding:0}
+.project-showcase .project-desc{color:var(--text2);font-size:15px;margin-bottom:20px;line-height:1.7}
+.project-showcase .project-stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.project-showcase .project-stack span{background:var(--bg);border:1px solid var(--border);padding:3px 10px;border-radius:4px;font-size:12px;color:var(--text2)}
+.project-showcase .project-links{display:flex;gap:12px}
+.project-showcase .project-links a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:14px;text-decoration:none;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{opacity:.9}
+.btn-secondary{background:var(--bg-card);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent)}
+.project-arch{background:var(--code-bg);padding:14px 18px;border-radius:8px;font-family:monospace;font-size:13px;color:var(--text2);margin:16px 0;border:1px solid var(--border);white-space:pre;overflow-x:auto}
 .post-card:hover{border-color:var(--accent)}
 .post-card .post-num{font-size:12px;color:var(--text2);margin-bottom:8px}
 .post-card .post-title{font-size:16px;font-weight:600;color:var(--accent);margin-bottom:8px}
@@ -72,6 +84,23 @@ footer a{color:var(--accent);text-decoration:none}
     <span>BGE Reranker</span><span>LanceDB</span><span>Next.js</span><span>TypeScript</span>
   </div>
 </section>
+
+<!-- ===== 项目展示 ===== -->
+<div class="project-showcase">
+  <div class="project-badge">🚀 开源项目</div>
+  <h2>Agent 领域智能学习助手</h2>
+  <p class="project-desc">基于 LangGraph + TypeScript + DeepSeek 的 Multi-Agent 对话系统。6 个智能体协同工作——概念讲解、应试答题、代码实战、学习规划、前沿资讯。自研 RAG 检索增强管线 + Mem0 记忆系统 + MCP 工具协议 + Next.js 流式 Web 界面。</p>
+  <div class="project-arch">用户输入 → classify(意图+RAG+记忆) → [概念|答题|代码|规划|资讯] → reflect(评分) → 返回
+                           ↑ 条件边路由                              ↑ 循环边重试</div>
+  <div class="project-stack">
+    <span>TypeScript</span><span>Node.js</span><span>Next.js 14</span><span>LangGraph</span><span>DeepSeek API</span>
+    <span>LanceDB</span><span>BGE Reranker</span><span>MCP</span><span>Mem0</span><span>Vercel AI SDK</span>
+    <span>Docker</span><span>LangSmith</span>
+  </div>
+  <div class="project-links">
+    <a href="https://github.com/crimsonkingdde/agent-notes" class="btn-secondary">📂 项目文档</a>
+  </div>
+</div>
 
 <h2 class="section-title" id="articles">📚 全部文章</h2>
 <div class="post-grid">
