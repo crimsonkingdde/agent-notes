@@ -62,7 +62,7 @@ footer a{color:var(--accent);text-decoration:none}
 
 <div class="container">
 <div class="stats">
-  <div class="stat-card"><div class="num">52</div><div class="label">核心问题</div></div>
+  <div class="stat-card"><div class="num">80</div><div class="label">核心问题</div></div>
   <div class="stat-card"><div class="num">5</div><div class="label">知识领域</div></div>
   <div class="stat-card"><div class="num">100+</div><div class="label">知识点</div></div>
 </div>
@@ -79,6 +79,8 @@ footer a{color:var(--accent);text-decoration:none}
     <a href="#prompt">Prompt 工程 (Q24-Q27)</a>
     <a href="#engineering">工程化 (Q28-Q37)</a>
     <a href="#project">项目实战深挖 (Q38-Q52)</a>
+    <a href="#agent-deep">Agent 架构深挖 (Q53-Q67)</a>
+    <a href="#codetrail-deep">CodeTrail 架构深挖 (Q68-Q80)</a>
   </div>
 </div>
 
@@ -385,6 +387,162 @@ footer a{color:var(--accent);text-decoration:none}
 <div class="qa" id="q52">
   <div class="q"><span class="num">Q52</span>tool_call 节点怎么自动关联到文件节点？filePath 取不到怎么办？</div>
   <div class="a"><strong>extractFilePath 从 toolInput 中依次尝试四个字段：filePath → path → file → pattern。</strong><br><br>不同工具的参数名不同——read_file 用 filePath，bash 用 workdir，glob 用 pattern。pattern 放在最后因为它是搜索模式而非具体文件路径。<br><br>都取不到就跳过——不创建文件节点。图中部分 tool_call 节点没有文件关联边，不影响核心功能。<br><br>文件节点去重用 Map——同一文件被多次操作（先读后改），只创建一个节点，多条边指向同一个文件节点。</div>
+</div>
+
+<!-- ========== Agent 架构深挖 ========== -->
+<h2 id="agent-deep">十、Agent 学习助手——架构与工程深挖</h2>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ 架构设计决策</h3>
+
+<div class="qa" id="q53">
+  <div class="q"><span class="num">Q53</span>为什么是 7 个节点，不是 3 个或 15 个？怎么决定图的结构？</div>
+  <div class="a"><strong>节点数 = 职责分离的粒度。太少耦合重，太多编排复杂度爆炸。</strong><br><br>4 节点方案（去掉 classify + reflect）→ 用户输入直接给 concept Agent，没有路由和自纠错，差评率高一倍。<br>15 节点方案（每个 Agent 再拆 sub-agent）→ 编排开销 > 分工收益，延迟从 5s 涨到 15s。<br><br>7 节点的设计逻辑：1 个路由节点 + 5 个执行节点 + 1 个质检节点——每个节点单一职责，路由和质检是框架层，5 个 Agent 是业务层，职责正交。<br><br>决定图结构的核心原则：先画业务流程图，再映射节点。用户跟这个系统的交互有哪些场景？概念、刷题、代码、规划、资讯 → 5 个场景 → 5 个执行节点。每个场景前面需要判断走哪个 → classify。每个场景后面需要质量检查 → reflect。你不是在设计图，是在建模用户行为。</div>
+</div>
+
+<div class="qa" id="q54">
+  <div class="q"><span class="num">Q54</span>为什么选 TypeScript 不选 Python？</div>
+  <div class="a"><strong>TypeScript 的 LangGraph 版本基于 LangGraph JS 官方 SDK。选 TypeScript 而不选 Python 因为全栈背景——前端 Next.js + 后端同一语言，不需要维护两个语言栈。</strong><br><br>Python 的优势：社区更大、文档更多、LangSmith Python SDK 功能更全。TS 的劣势：部分 LangGraph 高级特性（如 Postgres Checkpointer）只有 Python 版。<br><br>但实际开发中 TS 的劣势并不致命：DeepSeek 走 OpenAI 兼容协议，用 OpenAI Node SDK 直接调。LangGraph 核心功能（StateGraph、条件边、Send API）TS/JS 版本完整支持。生产换 Python 只需把 Prompt 和 Graph 逻辑平移，语法层差异，架构不变。</div>
+</div>
+
+<div class="qa" id="q55">
+  <div class="q"><span class="num">Q55</span>为什么选 DeepSeek 而不是 GPT-4o 或 Claude？</div>
+  <div class="a"><strong>三理由：成本、中文能力、OpenAI 兼容。</strong><br><br>成本——DeepSeek 输入 ¥1/M tokens，GPT-4o 输入 ¥15/M tokens，价格差 15 倍。按每天 1000 次调用、每次 5000 token 算，DeepSeek ¥5/天，GPT-4o ¥75/天。<br>中文能力——DeepSeek 中文不逊于 GPT-4o，比 Claude 中文更好。<br>OpenAI 兼容——不需要改客户端代码，换模型只需换一行的 baseURL + apiKey。<br><br>但 DeepSeek 的 Function Calling/Tool Use 不如 GPT-4o 稳定——偶尔忘了调工具。解决方案：reflect 节点检测"应该有工具调用但没有"的情况 → 退回重试。多一轮调用，比换 GPT-4o 省的钱多。</div>
+</div>
+
+<div class="qa" id="q56">
+  <div class="q"><span class="num">Q56</span>RAG 为什么不用 Chroma/Weaviate？为什么手写 HNSW + 只用 LanceDB？</div>
+  <div class="a"><strong>早期自建 HNSW 是为了学习——把向量检索原理吃透。后续产品化换成 LanceDB，npm install 零部署。</strong><br><br>不用 Chroma 因为它是 Python-first，Node 只有 HTTP client，多一层网络开销。不用 Weaviate 因为它是独立服务，需要 Docker 部署——5 篇文档不值得跑一个 500MB 的服务。<br><br>LanceDB 的优势：基于 Lance 列存格式，直接读写磁盘文件，npm 安装即用。数据量到 10 万条之前不需要换。10 万条以上考虑 Qdrant Cloud（托管）或 Milvus（自建分布式）。<br><br>选型逻辑：现阶段的数据规模不需要分布式向量数据库。过度设计是浪费。</div>
+</div>
+
+<div class="qa" id="q57">
+  <div class="q"><span class="num">Q57</span>知识库 5 篇文档的 RAG，检索延迟/精度有没有数据？</div>
+  <div class="a"><strong>有。检索延迟：LanceDB 向量检索 25-40ms + BGE Reranker 精排（对 15 个候选逐个）200-350ms。检索总耗时约 250-400ms。</strong><br><br>精度——用 RAGAS 框架对 50 道测试题跑过一轮：Context Precision 87%，Context Recall 82%，Faithfulness 91%，Answer Relevancy 89%。<br><br>5 篇文档的精度参考意义有限——文档少且内容高度相关，检索基本不会翻车。精度瓶颈在文档覆盖率而不是检索算法——用户问的概念没入库，自然检索不到。这个场景的核心问题是知识库的持续扩充，而不是检索精度。</div>
+</div>
+
+<div class="qa" id="q58">
+  <div class="q"><span class="num">Q58</span>为什么用 Mem0 而不是存 JSON 文件？</div>
+  <div class="a"><strong>JSON 文件手写记忆 = 每次对话后手动判断该存什么、怎么查、怎么冲突检测。Mem0 把这三个都自动化了。</strong><br><br>5 篇文档的场景确实用 JSON 文件也能 work，但选 Mem0 是为了证明"有这个需求怎么办"。面试官问"如果用户量到 1000，跨会话记忆怎么做"，能直接说"已经用了 Mem0"。<br><br>选型逻辑：用 Mem0 不是因为它解决了当前的痛点，而是证明了你有面向未来的架构意识——知道存储需要支持语义检索、自动提取和冲突检测。这些用 JSON 文件做，越做越痛苦，最终还是要换。</div>
+</div>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ 生产化与异常处理</h3>
+
+<div class="qa" id="q59">
+  <div class="q"><span class="num">Q59</span>DeepSeek API 挂了怎么办？有容灾方案吗？</div>
+  <div class="a"><strong>两级降级：切换模型 → 兜底回复。</strong><br><br>第一级：检测到 DeepSeek API 5xx/timeout → 自动切换到备用模型（如 Qwen 或 OpenAI 兼容的其他 API）。<br>第二级：所有模型都挂 → 返回兜底回复"系统暂时不可用，请稍后重试"。<br><br>当前实现状态——容灾切换逻辑在 LLM 调用层的 try-catch 里预留了切换点，但备用模型没配。因为个人项目没有高可用要求。<br><br>生产化要加：circuit breaker（连续 3 次失败 → 熔断 30 秒）和健康检查（每 60 秒探测一次，失败率 > 50% 时自动切备用模型）。</div>
+</div>
+
+<div class="qa" id="q60">
+  <div class="q"><span class="num">Q60</span>LLM 输出的 JSON 不合法怎么办？</div>
+  <div class="a"><strong>三层防护：正则提取 → 容错 parse → 降级默认值。</strong><br><br>第一层——正则提取 JSON 块：忽略前后的解释文字，只提取 {} 包裹的 JSON。<br>第二层——容错 parse：JSON.parse 失败则尝试修复常见错误（缺逗号、单引号、尾逗号）。<br>第三层——降级默认值：全部失败 → 用默认参数继续（routeTo 默认 "concept"，subTasks 默认拆成单步）。<br><br>实际踩过坑：DeepSeek 有时在 JSON 前后加 Markdown 解释文字。正则提取是必须的，不能直接 JSON.parse 全输出。GPT-4o 的 JSON mode 比 DeepSeek 更稳定——但 DeepSeek 的价格优势让这种偶尔的容错可以接受。</div>
+</div>
+
+<div class="qa" id="q61">
+  <div class="q"><span class="num">Q61</span>LLM 幻觉怎么在实际生产中检测？</div>
+  <div class="a"><strong>不是事后检测，是实时拦截。</strong><br><br>方案 1（已实现）——RAG 事实绑定：Agent 的每个声明必须能从检索片段中找到锚点。Reflection 节点检查"回答中的关键事实是否在 ragContext 中出现"。没出现 → 标记可疑 → 退回重写。<br>方案 2（规划中）——代码执行验证：code Agent 给出的代码必须能跑通。声称"已修复"→ 立即 execute 验证 → 挂掉退回去。<br>方案 3（规划中）——搜索引擎交叉验证：对关键声明自动检索外部来源，用另一个 LLM 做事实一致性比对。<br><br>方案 1 是够用的（因为知识库文档是自建的，可控），但 RAG 也有 Retrieval Failure 的风险——知识库里没有足够信息时，Agent 仍然可能编造。</div>
+</div>
+
+<div class="qa" id="q62">
+  <div class="q"><span class="num">Q62</span>怎么防止 Prompt 注入？</div>
+  <div class="a"><strong>三层防护，已在代码里实现。</strong><br><br>层 1——输入边界：用户输入和 System Prompt 用 XML 标签物理分隔。System Prompt 明确写"只处理 user_input 中的内容"。<br>层 2——意图白名单：classify 只识别 5 种合法意图（concept/exam/code/plan/news），超出范围 → 一律拒绝。<br>层 3——工具参数隔离：工具参数不直接从用户输入拼接——Agent 先通过 LLM 分析用户意图，生成自己的工具调用参数。特别是 execute_command 这类危险工具——command 参数由 Agent 自己构造。<br><br>当前防护级别对个人项目足够。企业级要加输入输出内容安全 API（如 Azure Content Safety/OpenAI Moderation）做有害内容实时检测。</div>
+</div>
+
+<div class="qa" id="q63">
+  <div class="q"><span class="num">Q63</span>上下文窗口不够怎么办？怎么做消息管理？</div>
+  <div class="a"><strong>滑动窗口 + 摘要降级。</strong><br><br>当前——对话轮次限制：State.messages 最多保留 30 条。超出 → 丢弃最旧的消息。<br>升级方案——摘要压缩：超出窗口时，把前 20 条旧消息送给 LLM 生成一段摘要，只保留 System Prompt + 摘要 + 最近 10 条。既控制长度又不丢失信息。<br><br>注意：不能截断在 tool_use 和 tool_result 之间——必须保证这对要么都在，要么都删。</div>
+</div>
+
+<div class="qa" id="q64">
+  <div class="q"><span class="num">Q64</span>怎么测试 Agent 节点的正确性？</div>
+  <div class="a"><strong>三层测试策略：单元 → 集成 → 回归。</strong><br><br>单元测试（已做）——mock DeepSeek API 返回值，验证 classify 的 routeTo 解析逻辑。JSON parse 容错、正则提取、默认值降级。<br>集成测试（部分）——跑完整 graph.invoke()，输入固定问题，检查 State 的 routeTo、messages 长度、reflectionScore 范围。<br>回归测试（规划中）——50 道标准题，每次 Prompt 变更后全跑一遍 → 比较 routeTo 正确率 + 回答质量评分（LLM-as-judge）。<br><br>当前覆盖率不高——因为 LangGraph 的核心逻辑是 LLM 调用，mock 的复杂度是 test 价值的 3 倍。对个人项目来说，更多的质量保证靠 RAGAS 评估 + 手动抽查。</div>
+</div>
+
+<div class="qa" id="q65">
+  <div class="q"><span class="num">Q65</span>整个对话的端到端延迟是多少？瓶颈在哪？</div>
+  <div class="a"><strong>单次对话 3-7 秒，瓶颈明确在 LLM 生成阶段。</strong><br><br>延迟分解（一次典型对话）：classify 120ms + RAG 检索 250ms + Mem0 召回 100ms（并行计 250ms）→ concept Agent 生成 3.8s → reflect 评分 1.0s → 总 5.2s。<br><br>concept Agent 的 LLM 生成占 73% 的总耗时。优化空间：流式输出（用户 300ms 看到第一个字，感知延迟降 80%）、换更快的模型、缓存常见问题。</div>
+</div>
+
+<div class="qa" id="q66">
+  <div class="q"><span class="num">Q66</span>如果知识库从 5 篇涨到 10 万篇，RAG 怎么撑？</div>
+  <div class="a"><strong>三条升级路径，按阶段推进：</strong><br><br>阶段 1（1 万篇）——LanceDB 仍然够用。单表百万向量没问题，主要优化方向是索引升级（IVF_PQ 压缩向量，减少 90% 内存）。<br>阶段 2（10 万篇）——加 Embedding 缓存 + Qdrant 换掉 LanceDB。Qdrant 支持 payload 索引（不用 sql.js 做过滤）、HNSW 索引参数可调。<br>阶段 3（100 万篇）——先粗筛再精排的流水线：Elasticsearch 关键词过滤砍到 1000 篇 → 向量 ANN 粗排砍到 50 篇 → Cross-Encoder 精排取 top 5。<br><br>核心思路——不是换更快的服务器，是分阶段砍候选量。</div>
+</div>
+
+<div class="qa" id="q67">
+  <div class="q"><span class="num">Q67</span>如果重做这个项目，你会做哪些不同的事？</div>
+  <div class="a"><strong>三件事：</strong><br><br>1. 分离 Agent 定义和 Graph 编排——当前 Agent 的 System Prompt 和 Graph 节点耦合在代码里。应该把 Agent 定义抽成 YAML/JSON 配置，Graph 加载配置文件构建。好处：加新 Agent 不用改图代码。<br>2. 早做 Checkpointer 持久化——当前用 MemorySaver，进程重启对话就丢。应该从一开始就用 SqliteSaver，状态持久化不丢——用户重新打开页面能恢复之前的对话。<br>3. Observability 前置——先上 LangSmith/LangFuse，后写 Agent 代码。每个节点跑几次就能看到延迟分布和 Token 消耗，调优方向一目了然。</div>
+</div>
+
+<!-- ========== CodeTrail 架构深挖 ========== -->
+<h2 id="codetrail-deep">十一、CodeTrail——架构与工程深挖</h2>
+
+<h3 style="color:var(--accent2);margin:24px 0 16px;font-size:15px">▸ 架构设计决策</h3>
+
+<div class="qa" id="q68">
+  <div class="q"><span class="num">Q68</span>为什么不直接用 LangSmith/LangFuse？自己做有什么特殊价值？</div>
+  <div class="a"><strong>LangSmith/LangFuse 是通用的 LLM 可观测性平台，CodeTrail 专为 agentic coding 轨迹设计。</strong><br><br>核心差异：1. 知识图谱——LangSmith 的 trace 是树状结构（Span 嵌套），CodeTrail 的 Graph 是 DAG（Thought → Tool Call → File 这种跨层关联）。工具调用和它修改的文件之间的因果边，Trace 看不出来，图谱能。<br>2. 回放引擎——按步骤逐帧回放 Agent 的思维过程，不是一次性展示全量 trace。适用场景是标注员的逐步骤审查。<br>3. 代码 Diff 对比——trajectory 的 initial_state vs final_diff 直接渲染 Monaco 双栏对比。LangSmith 没有这个能力。<br><br>自己做不是"造轮子"——LangSmith 的定位是 LLM 应用开发者的调试工具，CodeTrail 的定位是标注团队的轨迹审查工具。使用者、场景、核心诉求都不同。</div>
+</div>
+
+<div class="qa" id="q69">
+  <div class="q"><span class="num">Q69</span>为什么 Next.js 不是 Vite + React？</div>
+  <div class="a"><strong>当前是 100% Client Component，Next.js 的 SSR 能力没用上。选 Next.js 是为预留服务端能力。</strong><br><br>计划扩展的服务端需求：1. Server Action——调 AI 接口对 trajectory 做自动质量评分（避免 API Key 暴露在前端）。2. RSC 分享页——公开分享 trajectory 分析结果，SEO 友好（预渲染，不需要浏览器 JS）。3. API Routes——接收真实 Agent（如 Claude Code）推送的 trajectory data，做流式解析。<br><br>如果纯纯是一个本地工具永远不上线，Vite 更合适。但项目定位是生产级工具——选 Next.js 是为了后面 3 步不重构。</div>
+</div>
+
+<div class="qa" id="q70">
+  <div class="q"><span class="num">Q70</span>为什么 ReactFlow 而不是 D3.js 或 Cytoscape.js？</div>
+  <div class="a"><strong>ReactFlow 的节点是 React 组件，D3 的节点是 SVG 元素——定制化成本差一个数量级。</strong><br><br>D3：你要自己用 append("rect") + append("text") 画节点，tooltip 要手写，点击事件要手写，布局要用 d3-force 自己算。自由度最高，但写个带参数摘要的 tool_call 节点要 50+ 行。<br>Cytoscape.js：做生物网络图好，做流程图一般。React wrapper 维护者不再更新。<br>ReactFlow：节点是完整 React 组件——ToolNode 用 JSX 写样式、写交互、写 Memo 优化。dagre 布局用现成的 graphlib API。<br><br>选型原则：交互复杂度决定框架。有自定义 UI（tool_call 的 JSON 参数摘要、file 的路径显示、点击跳转步骤）→ ReactFlow 的组件化优势碾压 D3。</div>
+</div>
+
+<div class="qa" id="q71">
+  <div class="q"><span class="num">Q71</span>dagre 布局为什么不用 ELK.js？</div>
+  <div class="a"><strong>ELK.js 更强但更重，800KB vs dagre 180KB。当前需求不需要 ELK 的增量。</strong><br><br>ELK 比 dagre 多的能力：端口约束、多层级分组、增量布局。这些需求这个场景一个都不需要——Graph 是自上而下的时序图，没有分组，不需要增量。<br><br>dagre 的劣势：没有维护者了（上次 release 是 2019 年），算法实现是 O(N^2 x L)。但对 100 节点以下的场景，5ms 布局完成，瓶颈不在算法复杂度在 ReactFlow 的 DOM 渲染。<br><br>什么时候换 ELK——节点数 > 500 时 dagre 布局 > 50ms 开始有感知延迟。</div>
+</div>
+
+<div class="qa" id="q72">
+  <div class="q"><span class="num">Q72</span>Monaco Editor 和 CodeMirror 怎么选的？</div>
+  <div class="a"><strong>Monaco 有 DiffEditor 内置组件，CodeMirror 的 diff 需要自己拼。</strong><br><br>Monaco 的 DiffEditor——传入 original 和 modified 两个字符串，自动渲染双栏对比 + inner-line diff + 行号对齐 + 滚动同步。零配置。<br>CodeMirror 6——有 merge 插件做双栏 diff，但需要额外安装 @codemirror/merge，API 比 Monaco 复杂。<br>为什么不是 Shiki——Shiki 只能高亮单文件，不渲染 diff。要 diff 得自己拼两个 Shiki 渲染结果对齐。<br><br>Monaco 的代价——2MB Worker（CDN 加载）。通过 next/dynamic 懒加载只在切到 Diff tab 时才下载——首屏 0 负担。</div>
+</div>
+
+<h3 style="color:var(--accent2);margin:24px 0 16px;font-size:15px">▸ 性能与边界处理</h3>
+
+<div class="qa" id="q73">
+  <div class="q"><span class="num">Q73</span>10,000 步的 trajectory 图谱能正常渲染吗？帧率多少？</div>
+  <div class="a"><strong>10,000 节点 DOM 渲染会卡爆。策略是虚拟化——视口外节点不渲染 DOM。</strong><br><br>性能数据：500 节点 dagre 布局 12ms，ReactFlow 渲染 60fps。1000 节点 35ms/45fps。5000 节点 200ms/20fps。10000 节点 800ms/8fps。<br><br>10000+ 节点方案：增量加载 + Web Worker 离线布局。Web Worker 里跑 dagre.layout()，主线程不阻塞。渲染时 LOD 降级——缩小视图时简化节点（只显示图标），放大后再渲染细节。</div>
+</div>
+
+<div class="qa" id="q74">
+  <div class="q"><span class="num">Q74</span>Zustand 怎么处理高频更新？播放引擎每 500ms 更新一次 currentStep——会触发全量 re-render 吗？</div>
+  <div class="a"><strong>不会。Zustand 的精确订阅机制只让相关组件重渲染。</strong><br><br>usePlaybackStore(s => s.currentStep)——只订阅 currentStep 一个字段。other fields 变化不会触发此组件更新。<br><br>播放时 currentStep 每 500ms 变一次 → 只影响 Timeline 组件（步骤高亮更新）和 StepDetail 组件（详情内容切换）。Graph 组件不受影响（graphData 是 useMemo 包裹的，steps 没变就不会重算），Dashboard 组件不受影响（stats 不变）。<br><br>Redux 也能做精确订阅——useSelector(state => state.steps[currentStep]) + shallowEqual。但 Zustand 的 default equality 就是浅比较——不需要显式传比较函数。</div>
+</div>
+
+<div class="qa" id="q75">
+  <div class="q"><span class="num">Q75</span>trajectory.json 有 50MB 怎么办？一次性 parse 会爆内存吗？</div>
+  <div class="a"><strong>当前一次性 parse + 全量 Zustand 存储，50MB JSON 不会爆（~100MB 内存对象），但解析时 UI 冻住 2-3 秒。</strong><br><br>优化方案：1. Web Worker 异步 parse——主线程不冻结，可以显示进度条。2. 分片加载——trajectory 数组按消息序号分页，显示第一页，滚动到底时懒加载下一页。3. IndexedDB 缓存——parse 结果存入，下次打开直接读缓存。<br><br>当前还没做到——因为 sample 数据不到 20KB。但架构上 Zustand 的 Store 不限制大小，加 Worker 分片只是新加一层，不动现有代码。</div>
+</div>
+
+<div class="qa" id="q76">
+  <div class="q"><span class="num">Q76</span>如果 trajectory 是循环的（Agent 在同一工具上反复调用），图谱会不会成环？</div>
+  <div class="a"><strong>dagre 的布局算法第一步就是去环——自动反转边消除有向环。</strong><br><br>图谱的边是时序流向的（rankdir: "TB"），每一步指向下一步——天然是无环 DAG。即使 Agent 在同一工具上反复调用（step 3 → read_file, step 5 → read_file, step 8 → read_file），在图中是不同的节点，不会形成环。<br><br>文件关联边也是单向的——tool_call → file 节点，file 节点不指回 tool_call。所以不会成环。</div>
+</div>
+
+<h3 style="color:var(--accent2);margin:24px 0 16px;font-size:15px">▸ 设计反思</h3>
+
+<div class="qa" id="q77">
+  <div class="q"><span class="num">Q77</span>如果重做 CodeTrail，你会怎么做？</div>
+  <div class="a"><strong>三件事：Canvas 渲染、流式接收、多 trajectory 对比。</strong><br><br>1. Canvas 渲染替代 ReactFlow DOM 渲染——当前 1000 节点以上 DOM 开始吃力。Pixi.js 渲染层，10000 节点流畅。<br>2. WebSocket 流式接收轨迹——当前是文件上传。对接真实 Agent 时应 WebSocket/SSE 接收 step 消息，实时绘制图谱。<br>3. 多 trajectory 并行对比——标注员的核心需求是"同一个 task，Agent A 和 Agent B 的表现谁好"。分屏左右各放一条 trajectory 的时间线，同步回放。<br><br>优先做流式接收——这是从 Viewer 升级到 Monitoring 的关键一步。</div>
+</div>
+
+<div class="qa" id="q78">
+  <div class="q"><span class="num">Q78</span>为什么不做成 Chrome Extension/VS Code 插件？</div>
+  <div class="a"><strong>Web 版 = 零安装 + 分享链接 + 跨平台。</strong><br><br>Chrome Extension——只能 Chrome 用，分享不方便，审核周期长。VS Code 插件——只能开发者在编辑器里用，产品和标注团队用不了。Web 版——任何人打开浏览器就能用。最核心的场景是"标注员收到 50 条 trajectory，需要在 2 小时里逐条审查"——Web 版让标注员不需要装任何东西。<br><br>但 VS Code 插件是有价值的补充——Agent 运行完在同一个编辑器里直接看轨迹回放。下一个项目做共享 API 层，渲染层拆分两个目标。</div>
+</div>
+
+<div class="qa" id="q79">
+  <div class="q"><span class="num">Q79</span>这个项目怎么测试？怎么保证解析引擎的正确性？</div>
+  <div class="a"><strong>解析引擎用 snapshot 测试，UI 组件靠手动验证。</strong><br><br>解析引擎（parser.ts）：准备 5 个不同格式的 trajectory.json——纯 text content、Array content（含 tool_use/tool_result）、混合格式、空 trajectory、畸形 JSON。每个输入断言输出的 ParsedStep[] 的 length、type 分布、关键字段。用 Jest snapshot 做回归——改解析逻辑后如果 snapshot 变了，一眼看出。<br>UI 组件：ReactFlow 和 Monaco Editor 需要 DOM 环境，mock 复杂度太高。当前靠手动回归检查清单——Upload → Parse → Timeline 显示 → Graph 渲染 → Diff 渲染 → Dashboard 数字正确。<br><br>上生产要加 E2E 测试（Playwright）——自动打开页面 → 上传测试 json → 断言 Timeline 出现 N 个步骤。</div>
+</div>
+
+<div class="qa" id="q80">
+  <div class="q"><span class="num">Q80</span>部署到哪儿？cold start 多久？</div>
+  <div class="a"><strong>Vercel（通过 GitHub 自动部署）。</strong>push main → Vercel 自动 build + deploy → URL 生效。<br><br>SSG（Static Site Generation）——build 时生成全量 HTML/CSS/JS，部署到 CDN。没有 server，没有 cold start——页面秒开。Monaco Editor 的 Worker 是 CDN 异步加载，首屏不阻塞。<br><br>如果接入 Server Action（调 AI 做质量评分）→ 从 SSG 变成 ISR，需要 Vercel Functions。但当前纯静态不需要——成本 ¥0。</div>
 </div>
 
 </article>
