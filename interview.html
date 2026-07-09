@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent 开发面试题库 — AgentNotes</title>
+<style>
+:root{--bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#c9d1d9;--text2:#8b949e;--accent:#58a6ff;--accent2:#f78166;--green:#3fb950;--warn:#d2991d;--code-bg:#0d1117}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.container{max-width:860px;margin:0 auto;padding:0 24px}
+header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+header .container{display:flex;align-items:center;justify-content:space-between}
+header .logo{font-size:20px;font-weight:700;color:#fff;text-decoration:none}
+header .logo span{color:var(--accent)}
+header nav{display:flex;align-items:center;gap:20px}
+header nav a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}
+header nav a:hover{color:var(--accent)}
+header nav a.active{color:var(--accent);font-weight:600}
+.hero{padding:60px 0 40px;text-align:center}
+.hero h1{font-size:32px;font-weight:800;color:#fff;margin-bottom:12px}
+.hero p{font-size:15px;color:var(--text2);max-width:560px;margin:0 auto}
+.stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;text-align:center;min-width:100px}
+.stat-card .num{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-card .label{font-size:12px;color:var(--text2);margin-top:4px}
+.toc{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:40px}
+.toc h2{font-size:16px;color:#fff;margin-bottom:12px}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.toc-grid a{color:var(--text2);text-decoration:none;font-size:13px;padding:4px 0;transition:color .2s}
+.toc-grid a:hover{color:var(--accent)}
+article{padding:0 0 80px}
+article h2{font-size:20px;color:#fff;margin:48px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--accent)}
+article h3{font-size:16px;color:var(--accent);margin:32px 0 8px}
+.qa{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin:16px 0;transition:border-color .2s}
+.qa:hover{border-color:var(--accent)}
+.qa .q{font-weight:700;font-size:15px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
+.qa .q .num{color:var(--accent);font-size:13px;min-width:28px;padding-top:2px}
+.qa .a{font-size:14px;line-height:1.8;padding-left:38px}
+.qa .a strong{color:var(--accent2)}
+footer{background:var(--bg-card);border-top:1px solid var(--border);padding:32px 0;text-align:center;color:var(--text2);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:768px){.stats{gap:8px}.stat-card{padding:12px 16px;min-width:80px}.stat-card .num{font-size:20px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="/agent-notes/" class="logo">Agent<span>Notes</span></a>
+    <nav>
+      <a href="/agent-notes/">首页</a>
+      <a href="/agent-notes/interview.html" class="active">面试题库</a>
+      <a href="https://github.com/crimsonkingdde">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Agent 开发面试题库</h1>
+  <p>从基础概念到工程落地，覆盖 Agent 开发全链路面试高频问题。基于 LangGraph + TypeScript 实战经验整理。</p>
+</section>
+
+<div class="container">
+<div class="stats">
+  <div class="stat-card"><div class="num">33</div><div class="label">核心问题</div></div>
+  <div class="stat-card"><div class="num">5</div><div class="label">知识领域</div></div>
+  <div class="stat-card"><div class="num">100+</div><div class="label">知识点</div></div>
+</div>
+
+<div class="toc">
+  <h2>📋 目录</h2>
+  <div class="toc-grid">
+    <a href="#foundation">Agent 基础概念 (Q1-Q6)</a>
+    <a href="#multi-agent">多 Agent 编排 (Q7-Q12)</a>
+    <a href="#framework">框架选型 (Q13-Q15)</a>
+    <a href="#memory">记忆系统 (Q16-Q17)</a>
+    <a href="#rag">RAG 相关知识 (Q18-Q21)</a>
+    <a href="#tool">工具设计 (Q22-Q23)</a>
+    <a href="#prompt">Prompt 工程 (Q24-Q26)</a>
+    <a href="#engineering">工程化 (Q27-Q33)</a>
+  </div>
+</div>
+
+<article>
+
+<!-- ========== Agent 基础概念 ========== -->
+<h2 id="foundation">一、Agent 基础概念</h2>
+
+<div class="qa" id="q1">
+  <div class="q"><span class="num">Q1</span>什么是 Agent，和普通 LLM 调用有什么区别？</div>
+  <div class="a">普通 LLM 调用是<strong>一次性</strong>的——你问它答，它只能给你训练数据里有的信息。<br><br>Agent 是 <strong>LLM + 工具 + 自主决策循环</strong>。它会在每轮自己判断"信息够不够？不够我该调什么工具？"——然后调工具、拿结果、再判断。这个循环直到它认为任务完成了才结束。<br><br>打个比方：普通 LLM 像问路——"故宫怎么走"，它凭记忆告诉你。Agent 像给你一个助手——"帮我去故宫"，它会自己查地图、规划路线、打车、路上遇到封路自己绕行，直到把你送到。</div>
+</div>
+
+<div class="qa" id="q2">
+  <div class="q"><span class="num">Q2</span>什么是 ReAct？</div>
+  <div class="a"><strong>ReAct = Reasoning + Acting</strong>，2022 年 Google 提出的一种 Agent 推理范式。<br><br>核心流程：<strong>Thought（思考）→ Action（行动）→ Observation（观察）→ Thought → Action → ... → Answer</strong><br><br>跟普通 LLM 的区别：普通 LLM 直接凭着训练数据回答（可能过时或幻觉）。ReAct 强制模型"先想再动再看结果"，每一步推理有据可查，减少胡说八道。你标注的 trajectory.json 里 &lt;thinking&gt; 就是 Thought，tool_use 就是 Action，tool_result 就是 Observation。</div>
+</div>
+
+<div class="qa" id="q3">
+  <div class="q"><span class="num">Q3</span>Function Calling 和 Tool Use 有什么区别？</div>
+  <div class="a">本质是一个东西——<strong>让 LLM 返回结构化 JSON，告诉程序"我要调这个函数/工具，参数如下"</strong>。不同厂商有不同叫法：<strong>Function Calling</strong> 是 OpenAI 的叫法，<strong>Tool Use</strong> 是 Anthropic 的叫法。<br><br>需要特别注意的是：<strong>不是 LLM 真的在执行工具</strong>。LLM 只输出调用指令，你的程序去执行，然后把结果塞回 LLM。</div>
+</div>
+
+<div class="qa" id="q4">
+  <div class="q"><span class="num">Q4</span>什么是 CoT（思维链）？</div>
+  <div class="a"><strong>CoT = Chain of Thought</strong>，让 LLM 把推理过程一步步写出来，而不是直接给答案。<br><br>不用 CoT："11 是质数吗？" → "是"<br>用 CoT："质数定义是只能被 1 和自身整除。检查 11 能否被 2~10 整除：2 不行、3 不行...所以 11 是质数。"<br><br>准确率显著提升，每一步可审计，中间步骤错就能发现。你标注的 trajectory.json 里 &lt;thinking&gt;...&lt;/thinking&gt; 就是 CoT。</div>
+</div>
+
+<div class="qa" id="q5">
+  <div class="q"><span class="num">Q5</span>CoT、ReAct、Plan-and-Execute 三者的区别是什么？</div>
+  <div class="a">三者都是 Agent 的推理范式，复杂度递进：<br><br><strong>CoT</strong>——无工具调用，把思路写出来，纯推理<br><strong>ReAct</strong>——想一步、做一步、看结果、再继续想，适合需要查资料/调工具的简单任务<br><strong>Plan-and-Execute</strong>——先列计划再逐步执行，适合多步骤复杂任务<br><br>实际工作场景中通常一个项目里这三种范式我们都会用到：用 Plan-and-Execute 拆任务，单个子任务内部用 ReAct 做探索，每一步推理都用 CoT 降低出错率。</div>
+</div>
+
+<div class="qa" id="q6">
+  <div class="q"><span class="num">Q6</span>什么是 Reflection 设计模式？</div>
+  <div class="a"><strong>Reflection = LLM 自己评自己，打分不合格就重做。</strong><br><br>流程：模型输出 → 交给 LLM 评分 → score &lt; 阈值 → 拿反馈去修正 → 重新输出 → score &gt;= 阈值 → 通过<br><br>在 LangGraph 里的实现：reflect 节点做四维评分（准确率 + 清晰度 + 可运行性 + 满意度），score &lt; 0.75 就通过循环边退回重做，最多 3 轮。这就是 Reflection 的工业级落地。</div>
+</div>
+
+<!-- ========== 多 Agent 编排 ========== -->
+<h2 id="multi-agent">二、多 Agent 编排</h2>
+
+<div class="qa" id="q7">
+  <div class="q"><span class="num">Q7</span>什么时候用多 Agent，什么时候用单 Agent？</div>
+  <div class="a"><strong>判断标准：看任务能不能拆成独立子任务、分工是否带来明显质量提升。</strong><br><br>多 Agent 的价值 = 分工带来的质量提升 − 编排带来的额外复杂度。如果分工不明显、不需要并行、不需要角色隔离（不同 system prompt），单 Agent 就够了。<br><br>✅ 该用多 Agent：上线新功能 → A 读需求、B 写代码、C 审查、D 测试，不同 Agent 有不同 system prompt<br>❌ 不该用：修一个参数缺失的 Bug → 一个 Agent 读-改-测三步闭环</div>
+</div>
+
+<div class="qa" id="q8">
+  <div class="q"><span class="num">Q8</span>Orchestrator 模式和 Peer-to-Peer 模式的区别？</div>
+  <div class="a"><strong>Orchestrator（编排者）</strong>：中心化，一个老板指挥多个员工。classify 是唯一路由决策点，Agent 之间不通信。可控，debug 一条线。<br><br><strong>Peer-to-Peer（对等）</strong>：去中心化，每个 Agent 自己决定跟谁说话。灵活，动态协作，不怕单点故障。但容易聊飞了，收敛困难。<br><br>我们的 agent-notes 项目是 Orchestrator——classify 按意图路由到 concept/exam/code 等子 Agent，Agent 之间不直接通信。</div>
+</div>
+
+<div class="qa" id="q9">
+  <div class="q"><span class="num">Q9</span>多 Agent 之间怎么通信？</div>
+  <div class="a">三种方式，按复杂度递增：<br><br><strong>1. 共享 State</strong>——所有 Agent 读/写同一个 State 对象（LangGraph 的做法，最简单）。Agent A 输出写 State，Agent B 从 State 读。<br><br><strong>2. 消息传递 Send/Receive</strong>——有明确收发关系，不污染全局 State。适合一对一协作。<br><br><strong>3. 消息队列/总线</strong>——所有 Agent 往 topic 发消息，关注该 topic 的 Agent 自己收。适合广播场景。</div>
+</div>
+
+<div class="qa" id="q10">
+  <div class="q"><span class="num">Q10</span>多 Agent 怎么通过 State 共享数据？</div>
+  <div class="a">就是<strong>公共黑板</strong>，不是互相喊话。以 LangGraph 为例：<br><br>classify 执行完 → 写入 State: { messages: [...], routeTo: "code", ragContext: "..." } → LangGraph 路由到 code Agent → code 从 State.messages 读前面所有对话历史 → 生成回答，追加到 State.messages → reflect 执行，读所有消息 → 打分。<br><br>关键机制是 <strong>reducer（合并策略）</strong>：messages 用 concat 追加（历史越滚越长），routeTo 用 lastValue 覆盖（新值覆盖旧值）。</div>
+</div>
+
+<div class="qa" id="q11">
+  <div class="q"><span class="num">Q11</span>并发写 State 怎么处理冲突？</div>
+  <div class="a"><strong>LangGraph 天然就没有并发写冲突</strong>——因为节点是顺序执行的，同一时刻只有一个节点在跑。<br><br>但在 Plan-and-Execute 中用 Send() API 并行执行无依赖子任务时：并行执行 → 各自产生输出 → Fan-in 等待全部完成 → reducer 合并。<br><br>冲突处理靠的就是 reducer：<strong>messages 用 concat 全部保留</strong>，<strong>routeTo/score 用 lastValue 最后完成的生效</strong>，还可以自定义 reducer（比如取最高分：Math.max）。</div>
+</div>
+
+<div class="qa" id="q12">
+  <div class="q"><span class="num">Q12</span>什么情况下多 Agent 可以并行，什么情况下必须串行？</div>
+  <div class="a"><strong>一条规则：子任务之间有依赖就必须串行，没依赖就能并行。</strong><br><br>判断标准：<br>• <strong>数据依赖</strong>：Agent B 是不是要用 Agent A 的输出当输入？<br>• <strong>状态依赖</strong>：Agent B 是不是等 Agent A 改完代码才能动手？<br><br>任一答"是" → 串行。都"否" → 并行。例如：写 README、写测试、写 Dockerfile 三者互不依赖，能并行。读源码 → 改代码 → 跑测试有严格依赖，必须串行。</div>
+</div>
+
+<!-- ========== 框架选型 ========== -->
+<h2 id="framework">三、框架与协议选型</h2>
+
+<div class="qa" id="q13">
+  <div class="q"><span class="num">Q13</span>LangGraph、AutoGen、CrewAI 分别适合什么场景？</div>
+  <div class="a"><strong>LangGraph</strong>——Agent 编排引擎，精细化控制每一步走向。适合复杂工作流、条件路由、循环。<br><strong>AutoGen</strong>——多 Agent 对话框架，适合代码审查（2 Agent 互相挑错）、头脑风暴。<br><strong>CrewAI</strong>——角色扮演式 Agent 团队，适合快速搭 CEO/程序员/测试员团队。上手难度最低。<br><br>实际项目通常是混用的：用 CrewAI 定义角色分工，遇到需要循环自纠错的场景，在单个 Agent 内部用 LangGraph 的循环边实现。互不冲突。</div>
+</div>
+
+<div class="qa" id="q14">
+  <div class="q"><span class="num">Q14</span>MCP 是什么，解决了什么问题？</div>
+  <div class="a"><strong>MCP = Model Context Protocol</strong>，Anthropic 提出的标准化工具调用协议。<br><br>以前不同框架调同一套工具要写不同的代码——LangChain 一套、AutoGen 一套、自研框架又一套。MCP 把框架和工具解耦：<strong>工具（MCP Server）写一次，任何框架的 MCP Client 都能调，支持热插拔，Server 可跑在 Docker 里做安全隔离</strong>。<br><br>一个类比：MCP 是工具的 USB 接口——定义统一协议，插上就能用。</div>
+</div>
+
+<div class="qa" id="q15">
+  <div class="q"><span class="num">Q15</span>A2A 协议是什么？同一个系统内需要吗？</div>
+  <div class="a"><strong>A2A = Agent-to-Agent Protocol</strong>，Google 提出，不同系统之间 Agent 互相委派任务的标准协议。核心三要素：Agent Card（能力名片）、Task（任务对象）、协商机制。<br><br><strong>同一个系统内完全不需要 A2A。</strong>LangGraph 里 Agent A 往 State 写、Agent B 读——都在一个进程里。MCP 管手（调工具），A2A 管嘴（跨系统）。只有当你的 Agent 要去调别人写的 Agent（跨进程、跨团队、跨公司）时，才需要 A2A 做标准化的握手和委派。</div>
+</div>
+
+<!-- ========== 记忆系统 ========== -->
+<h2 id="memory">四、记忆系统</h2>
+
+<div class="qa" id="q16">
+  <div class="q"><span class="num">Q16</span>Agent 的四种记忆类型分别是什么？</div>
+  <div class="a">
+    <strong>感官记忆</strong>——当前对话窗口，单次上下文。"刚才用户说了什么"<br>
+    <strong>短期记忆</strong>——当前会话，一轮对话。"几分钟前讨论过什么"<br>
+    <strong>长期记忆</strong>——外部存储（向量库/数据库），跨会话永久。"用户学过 RAG，HNSW 薄弱"<br>
+    <strong>工作记忆</strong>——临时草稿区，单次推理。"当前任务拆出的子步骤进度"<br><br>
+    对应项目里的实现：感官记忆 = State.messages；短期记忆 = LangGraph Checkpointer；长期记忆 = Mem0；工作记忆 = State.subTasks + reflectionRetries。
+  </div>
+</div>
+
+<div class="qa" id="q17">
+  <div class="q"><span class="num">Q17</span>Context Window 满了怎么办？</div>
+  <div class="a">三种策略：<br><br><strong>1. 滑动窗口</strong>——保留最近 N 条，超出的丢掉。最常用。<br><strong>2. 摘要压缩</strong>——用 LLM 把旧消息压缩成一段摘要，只保留摘要 + 最近消息。<br><strong>3. RAG 外挂记忆</strong>——把历史全存向量库，每次只检索相关片段塞进上下文。<br><br>核心原则：旧的不删（需要时可检索），当前窗口精简（只放必要的）。</div>
+</div>
+
+<!-- ========== RAG ========== -->
+<h2 id="rag">五、RAG 相关知识</h2>
+
+<div class="qa" id="q18">
+  <div class="q"><span class="num">Q18</span>RAG 和 Fine-tuning 怎么选？</div>
+  <div class="a"><strong>RAG 给模型外挂资料库，Fine-tuning 改变模型本身。</strong><br><br>RAG：模型不改，检索资料塞进 Prompt。更新快（换资料库就行），成本低，适合事实类、文档类、时效性强的场景。<br>Fine-tuning：模型参数被重新训练，知识内化。适合风格模仿、格式精确控制、领域术语内化。<br><br>RAG 管知识，微调管行为。两者不冲突——又要事实又想要风格就组合用。</div>
+</div>
+
+<div class="qa" id="q19">
+  <div class="q"><span class="num">Q19</span>Long Context 和 RAG 怎么选？</div>
+  <div class="a"><strong>问题只跟资料的一小部分相关 → RAG（精准、便宜）。问题需要理解全文才能回答 → Long Context（全量喂入）。</strong><br><br>实际最佳实践：先用 RAG，不够再补 Long Context。混合使用——RAG 检索候选段落，再用 Long Context 模型对候选段落做全局分析。取两家之长。</div>
+</div>
+
+<div class="qa" id="q20">
+  <div class="q"><span class="num">Q20</span>Embedding 模型怎么选？</div>
+  <div class="a">三条标准：<br><br><strong>1. 语言匹配</strong>——中文用 BGE-M3，英文用 text-embedding-3-large。选错语言语义区分度骤降 30%+。<br><strong>2. 维度 vs 成本</strong>——1536 维精度高但存储大，384 维精度略降但快 4 倍。10 万条以下不用纠结。<br><strong>3. 开源 vs API</strong>——开源零费用但需要自己部署 GPU，API 按 Token 计费但零运维。</div>
+</div>
+
+<div class="qa" id="q21">
+  <div class="q"><span class="num">Q21</span>向量数据库怎么选？</div>
+  <div class="a">
+    数据量 &lt; 100 万，不想运维 → <strong>LanceDB</strong>（npm install 即用）<br>
+    数据量 &gt; 100 万，需要分布式 → <strong>Milvus</strong>（十亿级性能最强）<br>
+    已经在用 PostgreSQL → <strong>pgvector</strong>（加个插件就行）<br>
+    中间态，追求单机性能 → <strong>Qdrant</strong>（Rust 实现，快且稳）<br><br>
+    一句话记忆：LanceDB = 文件即数据库，Milvus = 分布式巨无霸，Qdrant = 单机性能王，pgvector = SQL+向量一把梭。
+  </div>
+</div>
+
+<div class="qa" id="q22">
+  <div class="q"><span class="num">Q22</span>什么是 Agentic RAG？和普通 RAG 的区别是什么？</div>
+  <div class="a"><strong>普通 RAG</strong>——一次检索，直接回答。搜什么、搜一次够不够全在代码里写死。<br><strong>Agentic RAG</strong>——Agent 自己决定怎么搜，检索变成了工具，Agent 自主调用。<br><br>例子：用户问"比较 Python 和 Go 的并发模型差异"，Agentic RAG 会自己先搜 Python 并发 → 看结果 → 再搜 Go 并发 → 综合回答。不用你预设流程。普通 RAG 只搜一次。</div>
+</div>
+
+<!-- ========== 工具设计 ========== -->
+<h2 id="tool">六、工具设计</h2>
+
+<div class="qa" id="q23">
+  <div class="q"><span class="num">Q23</span>怎么设计一个好的 Tool？</div>
+  <div class="a">四条原则：<br><br><strong>1. 职责单一</strong>——一个工具只做一件事。Agent 不是程序员，看不懂复杂参数组合。<br><strong>2. 描述即文档</strong>——Agent 选工具靠读描述。说清楚"什么时候用、参数怎么填、返回什么"。<br><strong>3. 输出结构化 + 有边界</strong>——有 truncation 和分页，不要一次返回 5000 行撑爆上下文。<br><strong>4. 错误返回不要炸</strong>——返回 {success: false, error: "xxx", suggestion: "可以先用 list_files 查看"} 而不是直接 throw。</div>
+</div>
+
+<div class="qa" id="q24">
+  <div class="q"><span class="num">Q24</span>Tool 太多了 LLM 选不准怎么办？</div>
+  <div class="a">三条策略：<br><br><strong>1. 按场景分组</strong>——代码场景只给 read/edit/execute，搜索场景只给 search/fetch。一次只暴露 3-5 个工具。<br><strong>2. 工具描述加使用示例</strong>——"何时使用/何时不用" + 示例，消除歧义。<br><strong>3. RAG 选工具</strong>——先 Embedding 所有工具描述 → 用户问题检索 → top 5 相关工具 → 只暴露给 LLM。<br><br>核心原则：不是工具越多越好，是给 LLM "刚好需要的"那几个。</div>
+</div>
+
+<!-- ========== Prompt 工程 ========== -->
+<h2 id="prompt">七、Prompt 工程</h2>
+
+<div class="qa" id="q25">
+  <div class="q"><span class="num">Q25</span>System Prompt 怎么写才好？</div>
+  <div class="a">四条铁律：<br><br><strong>1. 说"你是谁"，不说"你不要"</strong>——正向描述行为，比否定句式可靠得多。<br><strong>2. 角色 → 能力边界 → 行为规范，三段式</strong>——你是谁 / 能干什么 / 该怎么干。<br><strong>3. 工具调用规则写死</strong>——不要让 LLM 自己摸索工具用法，在 System Prompt 里定义 SOP。<br><strong>4. 停止条件明确</strong>——同一错误 3 次 → 报告卡住，超出 15 轮 → 总结已完成部分。</div>
+</div>
+
+<div class="qa" id="q26">
+  <div class="q"><span class="num">Q26</span>Prompt 版本怎么管理？</div>
+  <div class="a"><strong>当普通代码管。</strong><br><br>Git 管理：prompts/ 目录下分类存放，改 Prompt 走 PR review 再合，changelog 记录每次改动原因。<br>代码内嵌：Prompt 和代码版本绑定，不会出现"线上跑的是哪个版本"的问题。<br>平台管理（大团队）：LangSmith Hub / PromptLayer 支持 A/B 分流、灰度发布。<br><br>核心原则：Prompt 就是代码的一部分，版本可追溯、可回滚、可对比效果。</div>
+</div>
+
+<div class="qa" id="q27">
+  <div class="q"><span class="num">Q27</span>Few-shot 和 Zero-shot 怎么选？</div>
+  <div class="a">先 Zero-shot → 如果不稳定 → 加 1 个例子 → 还不行 → 加第 2 个。例子够用就停，不是越多越好——3 个以上的 Few-shot 边际收益递减，每多加一个例子都是在烧 Context Window。</div>
+</div>
+
+<!-- ========== 工程化 ========== -->
+<h2 id="engineering">八、工程化落地</h2>
+
+<div class="qa" id="q28">
+  <div class="q"><span class="num">Q28</span>怎么降低 Agent 系统延迟？</div>
+  <div class="a">三条砍延迟的方向：<br><br><strong>1. 并行化无依赖节点</strong>——RAG 检索和 Mem0 召回同时启动，从串联 200ms 变成 max(100ms, 100ms) = 100ms。<br><strong>2. 流式输出</strong>——用 stream() 逐 Token 输出，首 Token 延迟 &lt; 300ms，用户感知延迟降 80%。<br><strong>3. 砍 LLM 调用次数</strong>——合并能合并的调用，一次输出多个决策。<br><br>优先顺序：流式 > 并行化 > 砍 LLM 调用。流式成本最低，效果最明显。</div>
+</div>
+
+<div class="qa" id="q29">
+  <div class="q"><span class="num">Q29</span>怎么估算 Agent 系统成本？</div>
+  <div class="a"><strong>成本 = Token 消耗 × 单价 + 基础设施</strong><br><br>单次对话成本 = (Input Token × 输入单价) + (Output Token × 输出单价)<br>Agent 成本 = 单次对话 × 平均轮次<br><br>以 deepseek-chat 为例：一次 5 轮对话 Input 10K + Output 2.5K → 约 ¥0.015。每天 1000 次 → ¥15/天。<br><br>Agent 比普通 LLM 贵在哪：多轮调用（5-15 次 vs 1 次）、Context 膨胀（每轮 Input 越来越大）、工具返回（占单次 Token 消耗 60%+）。</div>
+</div>
+
+<div class="qa" id="q30">
+  <div class="q"><span class="num">Q30</span>怎么降低 Token 消耗？</div>
+  <div class="a"><strong>1. 工具返回截断</strong>——不要全文，只给必要片段。工具返回占 Token 消耗 60%+，是最大出血点。<br><strong>2. 系统消息精简</strong>——只保留角色定义 + 核心规则。每次调用都带，砍一个无用词 = 省 N 轮 × 1 Token。<br><strong>3. 历史消息去重/压缩</strong>——旧消息只保留摘要，重复内容合并。<br><strong>4. 分类用小模型</strong>——classify 用便宜模型，复杂推理才用满血模型。100 Token vs 1000 Token，10 倍差距。</div>
+</div>
+
+<div class="qa" id="q31">
+  <div class="q"><span class="num">Q31</span>Agent 死循环怎么处理？</div>
+  <div class="a">三层防线：<br><br><strong>1. 硬上限</strong>——max_iterations = 15，超过直接终止。<br><strong>2. 相似输出检测</strong>——当前回答 ≈ 上一轮回答（语义相似度 &gt; 0.95）→ Agent 在重复自己，强制终止。<br><strong>3. 趋势监控</strong>——连续 3 轮 score 下降 → 越改越差；连续 5 轮没有新 tool_call → 纯思考不干活。<br><br>上限兜底 + 重复检测 + 趋势告警。</div>
+</div>
+
+<div class="qa" id="q32">
+  <div class="q"><span class="num">Q32</span>怎么保证 Agent 输出的稳定性？</div>
+  <div class="a">四个层面：<br><br><strong>1. 温度调低</strong>——classify 用 temperature=0（路由不能飘），Agent 生成用 0.3（允许变化但格式不乱）。<br><strong>2. 输出格式用 JSON 约束</strong>——结构化输出比自由文本稳定 10 倍。<br><strong>3. Few-shot 锚定期望</strong>——给 2-3 个标准示例，LLM 会模仿输出风格和粒度。<br><strong>4. 多轮投票</strong>——同一问题跑 3 次，路由都一致才高置信度通过。<br><br>稳定性不是让每次都一模一样，而是让关键决策（路由、格式、评分）不出错。</div>
+</div>
+
+<div class="qa" id="q33">
+  <div class="q"><span class="num">Q33</span>Prompt 注入攻击是什么？怎么防？</div>
+  <div class="a"><strong>Prompt 注入：用户输入里藏指令，劫持 Agent 行为。</strong><br><br>防御三层：<br><strong>1. 输入隔离</strong>——用户输入和 System Prompt 物理分离，用分隔符标清边界，过滤特殊字符。<br><strong>2. 白名单路由 + 意图检测</strong>——Agent 只做自己工具范围内的事，超出范围直接拒绝。<br><strong>3. 用户输入永不进工具</strong>——工具参数不能从用户原始输入直接拼接，必须经过 Agent 审核或自行生成。</div>
+</div>
+
+<div class="qa" id="q34">
+  <div class="q"><span class="num">Q34</span>Agent 怎么处理幻觉问题？</div>
+  <div class="a">四层防御：<br><br><strong>1. RAG 绑定事实</strong>——回答必须有出处，检索不到就说不知道。<br><strong>2. 工具执行验证</strong>——声称"已修复"就立即跑测试，挂掉就回退。<br><strong>3. Reflection 自纠错</strong>——另一个 LLM 检查输出中的事实错误。<br><strong>4. 输出时标注置信度</strong>——区分"根据源码确认"和"社区讨论倾向于"。<br><br>核心原则：Agent 的每一步声明都要能追溯到——要么来自检索结果，要么来自工具执行输出，要么标注为推测。</div>
+</div>
+
+<div class="qa" id="q35">
+  <div class="q"><span class="num">Q35</span>Tool 调用失败了怎么处理？</div>
+  <div class="a">三层容错，逐级升级：<br><br><strong>1. 工具内部重试</strong>——返回结构化错误 + 建议，不直接抛异常。<br><strong>2. Agent 自修复</strong>——看到错误信息 → 分析原因 → 换策略重试。这是 Agent 的核心能力。<br><strong>3. 降级兜底</strong>——同一工具连续失败 3 次，跳过这一步，用已有结果给部分回答。<br><br>LangGraph 的循环边就是做这个"退回重试"的—— ToolNode 的 raise_on_error=false + 条件边 retries < 3 → 退回重试。</div>
+</div>
+
+<div class="qa" id="q36">
+  <div class="q"><span class="num">Q36</span>Agent State 怎么做持久化？</div>
+  <div class="a"><strong>LangGraph 里一行搞定：Checkpointer</strong><br><br>开发环境：MemorySaver——内存存储，进程重启就丢。<br>生产环境：SqliteSaver——文件存储，重启不丢。或 PostgresSaver——多实例共享状态。<br><br>调用时指定 thread_id，同一 thread_id 下次调用会自动恢复之前的状态。从 MemorySaver 切到 SqliteSaver 只需要换一行代码。</div>
+</div>
+
+<div class="qa" id="q37">
+  <div class="q"><span class="num">Q37</span>eval 测试集是什么？怎么构建？</div>
+  <div class="a"><strong>eval 测试集 = 考试卷</strong>。用来衡量 Agent 能力的一套标准化题目，每道题有期望答案。<br><br>两个来源：<br><strong>1. 真实生产日志拆出来</strong>——你的 trajectory.json 就是天然测试集源，挑 200 条典型日志标注期望结果。<br><strong>2. 规则生成 + 人工校验</strong>——LLM 批量生成变体问题 → 人工筛掉不合格的 → 入测试集。<br><br>四个维度覆盖：简单单步 30%、多步推理 40%、自纠错 20%、边界异常 10%。好的测试集 = 能覆盖真实失败模式。</div>
+</div>
+
+</article>
+</div>
+
+<footer>
+  <p>基于 LangGraph + TypeScript 实战经验整理 · <a href="/agent-notes/">返回首页</a></p>
+  <p style="margin-top:8px"><a href="https://github.com/crimsonkingdde">GitHub</a> · <a href="https://github.com/crimsonkingdde/agent-notes">项目文档</a></p>
+</footer>
+
+</body>
+</html>
