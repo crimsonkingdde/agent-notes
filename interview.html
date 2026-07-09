@@ -62,8 +62,8 @@ footer a{color:var(--accent);text-decoration:none}
 
 <div class="container">
 <div class="stats">
-  <div class="stat-card"><div class="num">33</div><div class="label">核心问题</div></div>
-  <div class="stat-card"><div class="num">5</div><div class="label">知识领域</div></div>
+  <div class="stat-card"><div class="num">52</div><div class="label">核心问题</div></div>
+  <div class="stat-card"><div class="num">6</div><div class="label">知识领域</div></div>
   <div class="stat-card"><div class="num">100+</div><div class="label">知识点</div></div>
 </div>
 
@@ -77,7 +77,8 @@ footer a{color:var(--accent);text-decoration:none}
     <a href="#rag">RAG 相关知识 (Q18-Q21)</a>
     <a href="#tool">工具设计 (Q22-Q23)</a>
     <a href="#prompt">Prompt 工程 (Q24-Q26)</a>
-    <a href="#engineering">工程化 (Q27-Q33)</a>
+    <a href="#engineering">工程化 (Q28-Q37)</a>
+    <a href="#project">项目实战深挖 (Q38-Q52)</a>
   </div>
 </div>
 
@@ -302,6 +303,88 @@ footer a{color:var(--accent);text-decoration:none}
 <div class="qa" id="q37">
   <div class="q"><span class="num">Q37</span>eval 测试集是什么？怎么构建？</div>
   <div class="a"><strong>eval 测试集 = 考试卷</strong>。用来衡量 Agent 能力的一套标准化题目，每道题有期望答案。<br><br>两个来源：<br><strong>1. 真实生产日志拆出来</strong>——你的 trajectory.json 就是天然测试集源，挑 200 条典型日志标注期望结果。<br><strong>2. 规则生成 + 人工校验</strong>——LLM 批量生成变体问题 → 人工筛掉不合格的 → 入测试集。<br><br>四个维度覆盖：简单单步 30%、多步推理 40%、自纠错 20%、边界异常 10%。好的测试集 = 能覆盖真实失败模式。</div>
+</div>
+
+<!-- ========== 项目实战深挖 ========== -->
+<h2 id="project">九、项目实战深挖</h2>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ Agent 学习助手（LangGraph Multi-Agent）</h3>
+
+<div class="qa" id="q38">
+  <div class="q"><span class="num">Q38</span>项目的路由分发是怎么做的？交给 LLM 判断还是硬编码？</div>
+  <div class="a"><strong>交给 LLM 判断，不是硬编码 if-else。</strong><br><br>classify 节点调 DeepSeek API，Prompt 要求输出 JSON：<code>{routeTo: 'concept'|'exam'|'code'|'plan'|'news'}</code>，LangGraph 条件边读 routeTo 决定路由。<br><br><strong>为什么选 LLM：</strong>用户自然语言变体太多——"帮我写个排序"、"coding help"、"来段代码"——硬编码关键词覆盖不了。classify 用便宜模型、temperature=0，成本几乎可忽略，但灵活性和准确率远超 if-else。<br><br>注意：routeTo 使用 <strong>lastValue reducer</strong>，不是 concat——如果用 concat 会变成 ["code","code"] 数组，条件边无法匹配字符串，路由全乱。</div>
+</div>
+
+<div class="qa" id="q39">
+  <div class="q"><span class="num">Q39</span>classify 节点的 Prompt 具体怎么设计的？</div>
+  <div class="a"><strong>三段式：角色 → 任务 → 输出格式。</strong><br><br>角色：你是意图分析专家。任务：分析用户问题，判断属于概念讲解/应试答题/代码实战/学习规划/前沿资讯。同时调用 RAG 检索相关知识、Mem0 召回用户记忆，综合分析后输出。输出：严格 JSON 格式 {routeTo, ragContext, memoryContext, depth}。<br><br>关键细节：<strong>temperature=0</strong> 保证路由稳定性——同一问题不会今天分到 code 明天分到 exam。<strong>输出用 JSON 约束</strong>——正则 <code>/[\s\S]*/</code> 提取 JSON 块再 parse，不直接 JSON.parse，因为 LLM 有时会在 JSON 前后多输出解释文字。</div>
+</div>
+
+<div class="qa" id="q40">
+  <div class="q"><span class="num">Q40</span>五个子 Agent 的 System Prompt 有什么差异？怎么保证回答风格不同？</div>
+  <div class="a">每个 Agent 有独立的 System Prompt，核心差异在于 <strong>角色定位 + 输出格式：</strong><br><br><strong>concept（概念讲解）</strong>——"你是大学助教"，输出带"前置知识"和"小节总结"，用类比解释复杂概念。<br><strong>exam（应试答题）</strong>——"你是面试官"，先给题目 → 等用户回答 → 再点评，不给直接答案。<br><strong>code（代码实战）</strong>——"你是结对编程搭档"，先写思路再给代码，代码块必须标注语言，带注释。<br><strong>plan（学习规划）</strong>——"你是课程设计师"，输出分阶段的学习路线图，带时间估计和里程碑。<br><strong>news（前沿资讯）</strong>——"你是技术研究员"，严格标注信息来源和发布日期，不确定的标注"(未确认)"。<br><br>Prompt 复用：抽公共部分（行为规范、停止条件）到模板，各 Agent 只替换角色描述和输出格式。</div>
+</div>
+
+<div class="qa" id="q41">
+  <div class="q"><span class="num">Q41</span>Plan-and-Execute 的触发条件是什么？怎么判断问题复杂度？</div>
+  <div class="a"><strong>双条件触发：问题长度 > 40 字 + 包含特定关键词。</strong><br><br>关键词：<code>['对比', '规划', '搭建', '从零', '部署', '优化', '实现一个', '设计一个']</code>。<br><br>流程：classify 同时判断 isComplex，若 true → 先调用 LLM 拆解子任务（最多 5 个）→ 串行执行 → 汇总。子任务拆解用 <strong>temperature=0.1</strong>——拆解需要一致性，不能用默认 0.7。<br><br>当前子任务串行（有隐式依赖），未来可对无依赖子任务用 Send() API 并行。</div>
+</div>
+
+<div class="qa" id="q42">
+  <div class="q"><span class="num">Q42</span>RAG 两阶段检索具体怎么实现的？为什么这样设计？</div>
+  <div class="a"><strong>粗排（LanceDB 向量 + sql.js 关键词 → RRF 融合）→ 精排（BGE Reranker Cross-Encoder）。</strong><br><br>第一阶段：向量检索召回语义相似、关键词检索召回精确匹配 → RRF(k=60) 融合取 top 15。<br>第二阶段：BGE Reranker V2-M3 对 15 个候选逐一 Cross-Encoder 打分 → 精排取 top 5。<br><br><strong>为什么不能只用 Cross-Encoder：</strong>全库 500 条文档，每条都跟 query 拼接后过 24 层 BERT——500 × 50ms = 25 秒，不可接受。向量检索 O(log n) 先砍到 15 条，再精排。两阶段各司其职。<br><br>知识入库时为省钱用了 DeepSeek Embedding API——不是开源 BGE-M3。5 篇文档不需要自己部署 GPU。</div>
+</div>
+
+<div class="qa" id="q43">
+  <div class="q"><span class="num">Q43</span>你是怎么发现 State reducer 用错导致路由全乱的？</div>
+  <div class="a">state.messages 和 state.routeTo 都对 Annotation 配置了 concat reducer。结果 routeTo 不是字符串 "code"，而是数组 ["code", "code"]。LangGraph 条件边 <code>(state) => state.routeTo</code> 拿到数组，无法匹配任何 case 字符串——所有子 Agent 都不执行，直接跳到 reflect。<br><br>排查：LangSmith Trace 里看 routeTo 字段值 → 发现是数组 → 意识到 reducer 用错了 → 改成 lastValue（默认）→ 路由恢复正常。<br><br><strong>教训：LangGraph State 分两类——"累积型状态"（messages 用 concat）和"当前型状态"（routeTo/score 用 lastValue）。这是 StateGraph 的核心设计，混了就废。</strong></div>
+</div>
+
+<div class="qa" id="q44">
+  <div class="q"><span class="num">Q44</span>为什么选了 Mem0 而不是 LangGraph 原生的 Store？</div>
+  <div class="a">LangGraph 原生 Store 是<strong>手动 Key-Value 存储</strong>——需要自己定义字段、自己写 Put/Get。Mem0 的核心优势是：<strong>LLM 自动从对话中提取记忆单元，不需要预定义 Schema。</strong><br><br>示例：用户说"我学过 RAG 但不熟悉 HNSW" → Mem0 自动生成两条记忆 {"已掌握 RAG", "HNSW 薄弱"}。不用我写 if-else 判断该存什么。<br><br>冲突检测是 Mem0 的杀手特性：用户后来说"我其实不懂 RAG"，Mem0 自动覆盖之前的记忆。手动 Key-Value 要实现这个需要自己设计冲突解决逻辑。<br><br>但 Mem0 进一次网络 50-200ms——所以 classify 节点一次性召回 + 写入 State，后续 Agent 从 State 读，不各自查 Mem0。减少网络开销。</div>
+</div>
+
+<div class="qa" id="q45">
+  <div class="q"><span class="num">Q45</span>MCP 和 Function Calling 都支持工具调用，为什么选了 MCP？</div>
+  <div class="a"><strong>不是二选一，MCP 是 Function Calling 的上层标准化。</strong><br><br>Function Calling 是在 LLM 的请求参数里定义工具 Schema——工具定义和代码耦合。加新工具要改代码、重启服务。<br><br>MCP Server 是独立进程——JSON-RPC 通信、Docker 隔离部署、<code>tools/list</code> 自动发现。最大的优势：<strong>代码执行这个 Server 必须安全隔离</strong>——跑在 Docker 里，非 root 用户 + --memory=256m --network=none。Function Calling 的工具函数是进程内执行，没法做这个级别的隔离。<br><br>实际架构：LangGraph Agent 通过 MCP Client → JSON-RPC → 4 个 MCP Server（代码执行 / arXiv / 知识库 / 进度查询）。</div>
+</div>
+
+<h3 style="color:var(--accent2);margin:32px 0 16px;font-size:15px">▸ CodeTrail（Agent Coding 轨迹可视化）</h3>
+
+<div class="qa" id="q46">
+  <div class="q"><span class="num">Q46</span>trajectory.json 的解析引擎要同时处理哪两种 content 格式？</div>
+  <div class="a">同一个 <code>role="assistant"</code> 消息的 content 字段可能是 <strong>string 或 Array</strong>——这是 Anthropic Messages API 的多态设计：<br><br><strong>String content</strong>：Agent 的纯文本思考，可能包含 <code>&lt;thinking&gt;...&lt;/thinking&gt;</code> 标签包裹的推理块 + 普通文本。<br><strong>Array content</strong>：多 block 消息——<code>{"type": "tool_use", "id": "...", "name": "read_file", "input": {...}}</code> 和 <code>{"type": "text", "text": "..."}</code> 混排。<br><br>解析器分支处理——typeof string → 正则提取 thinking → 剩余文本归为 text 类型。Array.isArray → 遍历 block → tool_use 归为 tool_call 类型，text 归为 text 类型。<br><br><strong>踩坑：</strong>一开始写死了 string 分支，工具调用全部跳过。排查半小时发现是遗漏了 Array 格式。</div>
+</div>
+
+<div class="qa" id="q47">
+  <div class="q"><span class="num">Q47</span>dagre 布局的具体参数怎么调的？</div>
+  <div class="a"><code>rankdir: "TB"</code>（Top-to-Bottom）——轨迹是时间序，从上到下最自然。<br><code>ranksep: 80</code>——层间距 80px，太密节点叠在一起，太松需要滚动太多。<br><code>nodesep: 60</code>——同层节点间距，保证 tool_call 节点和 file 节点不重叠。<br><code>nodeWidth: 200, nodeHeight: 80</code>——根据节点实际内容估算的固定尺寸。dagre 的 layout() 是不考虑文字溢出的，节点宽高要配合 CSS 的 min-width/max-width。<br><br>调参方法：先给大值（100/80），看布局太松就缩小（60/50），看节点重叠就加大。没有公式，纯人工迭代。</div>
+</div>
+
+<div class="qa" id="q48">
+  <div class="q"><span class="num">Q48</span>自定义 ReactFlow 节点用 React.memo 后为什么还是不生效？</div>
+  <div class="a"><strong>因为每次 rebuildGraph 都生成新的 nodes 数组——即使内容不变，对象引用变了，React.memo 的浅比较失效。</strong><br><br>解决方案：用 <strong>useMemo</strong> 包裹 graphData 计算，只在 steps 变化时重新生成。同时 AgentNode 的 data 字段只传必要字段（id, type, label, detail, stepIndex），不用 <code>{...node}</code> 整个对象展开——展开会产生新的嵌套引用。<br><br>ReactFlow 的 memo 机制：当 ReactFlow 自身检测到 nodes 引用没变，它连内部 diff 都不做，省了最重的那步 DOM 比对。</div>
+</div>
+
+<div class="qa" id="q49">
+  <div class="q"><span class="num">Q49</span>Monaco Editor 怎么加载？首屏会受 2MB 影响吗？</div>
+  <div class="a"><strong>不影响首屏。</strong>用了 Next.js 的 <code>next/dynamic</code> 懒加载：<br><br><code>const MonacoDiffEditor = dynamic(() => import("@monaco-editor/react").then(m => m.DiffEditor), { ssr: false })</code><br><br>首屏是 Landing Page——只有 Uploader 组件，Monaco 不在首屏 bundle 里。用户切换到 Diff View tab 时才触发 Monaco Worker 的异步 CDN 加载。SSG 阶段完全不碰 Monaco。<br><br>如果不做懒加载，Monaco 的 JS + Worker 约 2MB 进首屏 bundle——LightHouse 得分直接扣 15 分以上。</div>
+</div>
+
+<div class="qa" id="q50">
+  <div class="q"><span class="num">Q50</span>unified diff parser 怎么从 initial_state + final_diff 重建代码？</div>
+  <div class="a"><strong>逐 hunk 逐行应用：</strong><br><br>1. 取 <code>initial_state</code> 的第一个文件内容作为 base<br>2. 按行解析 final_diff——匹配 <code>@@ -oldStart,oldLen +newStart,newLen @@</code> hunk header<br>3. 在当前 hunk 内：<br>&nbsp;&nbsp;&nbsp;- 以 "+" 开头的行 → 追加到右边 newLines<br>&nbsp;&nbsp;&nbsp;- 以 "-" 开头的行 → 跳过（旧内容要删除）<br>&nbsp;&nbsp;&nbsp;- 以 " " 开头或空行 → 两边都保留<br>4. 用 <code>Array.splice(oldStart - 1, oldLen, ...newLines)</code> 替换对应位置<br><br><strong>异常处理：</strong>"No newline at end of file"、空 hunk、非 Python 文件都走退化逻辑——异常 hunk 跳过，左右显示原始内容。生产级应该用 <code>npm: diff</code> 库做规范 parse，不用手写。</div>
+</div>
+
+<div class="qa" id="q51">
+  <div class="q"><span class="num">Q51</span>Zustand 和 Redux 怎么选的？为什么不用 Redux Toolkit？</div>
+  <div class="a"><strong>Zustand：create() 返回 hook，组件里 <code>usePlaybackStore(s => s.currentStep)</code> 精确订阅单一字段。</strong><br><br>Redux Toolkit 需要 <code>createSlice</code> + <code>configureStore</code> + <code>Provider</code> 包裹整个组件树——对全 Client Component 架构是额外的样板代码。Zustand 零 Provider，<code>create()</code> 一个函数搞定。<br><br>全局状态不乱吗？这个项目的状态非常集中——只有一个 trajectory 数据源，不是多页面多表单的复杂场景。<code>usePlaybackStore</code> 做了精确字段订阅（不传 selector 才订阅全量），选择器只取需要的字段则跳过无关更新。<br><br>如果以后支持多 trajectory 并行对比，拆成多 store 或者用 <code>createStore</code> 工厂函数。</div>
+</div>
+
+<div class="qa" id="q52">
+  <div class="q"><span class="num">Q52</span>tool_call 节点怎么自动关联到文件节点？filePath 取不到怎么办？</div>
+  <div class="a"><strong>extractFilePath 从 toolInput 中依次尝试四个字段：filePath → path → file → pattern。</strong><br><br>不同工具的参数名不同——read_file 用 filePath，bash 用 workdir，glob 用 pattern。pattern 放在最后因为它是搜索模式而非具体文件路径。<br><br>都取不到就跳过——不创建文件节点。图中部分 tool_call 节点没有文件关联边，不影响核心功能。<br><br>文件节点去重用 <code>Map&lt;filePath, fileNodeId&gt;</code>——同一文件被多次操作（先读后改），只创建一个节点，多条边指向同一个文件节点。</div>
 </div>
 
 </article>
