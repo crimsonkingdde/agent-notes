@@ -62,7 +62,7 @@ footer a{color:var(--accent);text-decoration:none}
 
 <div class="container">
 <div class="stats">
-  <div class="stat-card"><div class="num">80</div><div class="label">核心问题</div></div>
+  <div class="stat-card"><div class="num">95</div><div class="label">核心问题</div></div>
   <div class="stat-card"><div class="num">5</div><div class="label">知识领域</div></div>
   <div class="stat-card"><div class="num">100+</div><div class="label">知识点</div></div>
 </div>
@@ -254,8 +254,94 @@ footer a{color:var(--accent);text-decoration:none}
   <div class="a">先 Zero-shot → 如果不稳定 → 加 1 个例子 → 还不行 → 加第 2 个。例子够用就停，不是越多越好——3 个以上的 Few-shot 边际收益递减，每多加一个例子都是在烧 Context Window。</div>
 </div>
 
+<!-- ========== Agent 进阶概念 ========== -->
+<h2 id="advanced">八、Agent 进阶概念</h2>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ LLM 核心参数</h3>
+
+<div class="qa" id="q81">
+  <div class="q"><span class="num">Q81</span>Temperature 和 Top-P 怎么调？什么时候用什么参数？</div>
+  <div class="a"><strong>Temperature：控制随机性。0 = 确定性，1 = 高随机性。Top-P：按累计概率截断候选 token 集。</strong><br><br>调参法则：classify/路由/评分 → temperature=0（要确定性）。code/writing → 0.3。brainstorming → 0.7。<br><br>为什么不用 1.0：高 temperature 下 Token 候选概率平坦——本应选 "class" 的 token 随机选成 "function"——代码就废了。Agent 开发 90% 场景温度应在 0-0.3。<br><br>常见错误：Temperature 和 Top-P 同时调。先调 Temperature，Top-P 设为 1.0 关闭。只在需要进一步限制时才动 Top-P。</div>
+</div>
+
+<div class="qa" id="q82">
+  <div class="q"><span class="num">Q82</span>JSON Mode 是怎么工作的？有什么坑？</div>
+  <div class="a"><strong>通过修改 logits 让 LLM 强制输出合法 JSON——生成过程中动态检查每个 token 是否会破坏 JSON 结构，破坏则置 -inf。</strong><br><br>坑 1——不是所有模型都支持真正的 JSON Mode。DeepSeek/GPT-4o 支持，便宜模型只在 Prompt 里说"请输出 JSON"，Sampling 不约束。<br>坑 2——JSON 里嵌自由文本需要转义。如 {"answer": "Markdown"} 里的换行和引号需要转义，否则 JSON Mode 直接拒绝生成。<br><br>实践：复杂 JSON 用 structured output（OpenAI tool_choice），简单 JSON 用正则提取兜底。</div>
+</div>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ Agent 设计模式</h3>
+
+<div class="qa" id="q83">
+  <div class="q"><span class="num">Q83</span>Workflow 和 Agent 有什么区别？什么时候不该用 Agent？</div>
+  <div class="a"><strong>Workflow：步骤固定，无自主决策。Agent：步骤动态，自主决策。</strong><br><br>Workflow——"上传 PDF → 提取文字 → 翻译 → 存数据库"，LLM 不能自己加步骤或换顺序。<br>Agent——给目标和工具，LLM 自己决定先做什么、何时停。<br><br>什么时候不该用 Agent：1. 步骤明确且固定。2. 延迟要求极高（Agent 多轮 3-7s，Workflow 单次 1-2s）。3. 需要审计链（金融/医疗）。<br><br>原则：流程固定用 Workflow，需探索用 Agent。多数系统是混合——外层 Workflow 做预处理，内层 Agent 做核心推理。</div>
+</div>
+
+<div class="qa" id="q84">
+  <div class="q"><span class="num">Q84</span>Human-in-the-loop 是什么？怎么实现？</div>
+  <div class="a"><strong>关键操作在 Agent 执行前暂停，等人确认后再继续。</strong><br><br>LangGraph 实现：interrupt() + Command 恢复。节点里调 interrupt({question: "确认执行?"}) → 图暂停 → 返回中断信息给前端 → 用户确认 → 前端 send Command(resume="approved") → 图从断点继续。interrupt 不会丢 State——Checkpointer 保存完整 State。<br><br>当前项目没做——因为场景不涉及危险操作。但代码执行模块预留了 interrupt 断点。</div>
+</div>
+
+<div class="qa" id="q85">
+  <div class="q"><span class="num">Q85</span>Agent 最常见的失败模式有哪些？怎么防御？</div>
+  <div class="a"><strong>1. 无限循环</strong>——反复调同一工具拿同样结果 → 硬上限 + 相似输出检测。<strong>2. 提前终止</strong>——Agent 觉得够了但任务没完成 → Reflection 检测。<strong>3. 工具误用</strong>——用 read_file 当 search → 工具描述明确边界。<strong>4. 幻觉参数</strong>——调不存在的文件 → 工具返回附带建议。<strong>5. 上下文污染</strong>——前轮废信息占满窗口 → 滑动窗口 + 摘要。<strong>6. 路由错误</strong>——classify 判断错 → temperature=0 + Few-shot。<br><br>好的 Agent 系统不是不会失败，是失败了能自己修或优雅降级。</div>
+</div>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ RAG 进阶</h3>
+
+<div class="qa" id="q86">
+  <div class="q"><span class="num">Q86</span>文档分块策略怎么选？固定大小 vs 递归切分 vs 语义切分？</div>
+  <div class="a"><strong>递归切分最实用——优先保持语义完整。</strong><br><br>固定大小：500 字一刀——"GRPO 是"和"DeepSeek 提出的算法"切成两块。<br>递归切分：按 \n\n → \n → 。 → 空格 优先级找自然边界。<br>语义切分：相邻句子 Embedding 相似度骤降处切。最理想但最慢。<br><br>策略：先用递归切分（零成本），跑 RAGAS 评估。分数 < 80% 再试语义切分。</div>
+</div>
+
+<div class="qa" id="q87">
+  <div class="q"><span class="num">Q87</span>Lost in the Middle 是什么？怎么解决？</div>
+  <div class="a"><strong>LLM 对上下文窗口中间部分信息关注度骤降——开头和结尾记得住，中间忽略。</strong><br><br>实验数据：同一信息放开头 80% 准确率 → 中间 60% → 末尾 75%。<br><br>解决：1. 关键信息放两头。2. 减少上下文长度——滑动窗口 + 摘要压缩。3. RAG 结果按相关性排，最高相关放最前和最后。4. 多轮分步——长文档拆成多个子问题。<br><br>这就是为什么 RAG 要 reranker 精排——不仅为精度，也为把最相关文档放在 Prompt 的"黄金位置"。</div>
+</div>
+
+<div class="qa" id="q88">
+  <div class="q"><span class="num">Q88</span>混合检索和纯向量检索有什么区别？什么时候需要混合？</div>
+  <div class="a"><strong>纯向量：只靠 Embedding 相似度。混合检索：向量 + 关键词（BM25/TF-IDF）+ 其他信号融合。</strong><br><br>纯向量不行时：1. 精确匹配——"error code E10023" → 关键词精准命中。2. 特定术语——"MCP Server 配置" → 混合检索同时匹配概念和配置。<br><br>融合方式：RRF（Reciprocal Rank Fusion）——对每文档计算 rank_向量 + rank_关键词 → 综合排序。k=60 平滑。<br><br>当前项目用了混合检索——LanceDB 向量 + sql.js SQL LIKE → RRF 融合。</div>
+</div>
+
+<h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ 评估与安全</h3>
+
+<div class="qa" id="q89">
+  <div class="q"><span class="num">Q89</span>LLM-as-Judge 怎么做？可靠吗？</div>
+  <div class="a"><strong>用另一个 LLM 评估 Agent 的输出——评准确率、清晰度、安全性。</strong><br><br>做法：给 Judge LLM Prompt："以下是用户问题和 Agent 回答，按 1-10 打分。输出 JSON。"<br><br>可靠吗：不完全可靠，但有参考价值。问题：1. Position Bias——排前面的 candidate 倾向打更高分。解决：两两对比。2. Self-enhancement——Judge LLM 给"自己风格"输出打高分。解决：用不同家族模型做 Judge。3. 评分漂移——三次采样取均值。<br><br>项目 Reflection 就是 LLM-as-Judge——reflect 节点四维评分。temperature=0 保证一致性。</div>
+</div>
+
+<div class="qa" id="q90">
+  <div class="q"><span class="num">Q90</span>离线评估和在线评估有什么不同？各自什么时候做？</div>
+  <div class="a"><strong>离线：用历史数据测。在线：用真实用户行为测。</strong><br><br>离线——200 道标准题，跑一遍看正确率。Prompt 变更后跑全量回归。<br>在线——真实行为：点赞率、追问次数、对话继续率。<br><br>最佳实践：离线做快速迭代（10 分钟出结果），在线做长期趋势（每周看指标曲线）。互补不是替代。</div>
+</div>
+
+<div class="qa" id="q91">
+  <div class="q"><span class="num">Q91</span>工具沙箱怎么做？代码执行的安全边界在哪？</div>
+  <div class="a"><strong>代码执行是最危险的 Agent 工具——四层隔离。</strong><br><br>层 1：Docker 容器隔离——MCP Server 跑独立容器，非 root + --memory=256m --network=none。层 2：文件系统限制——volume 只挂载 /workspace。层 3：命令白名单——只允许 pytest/python/git 等。层 4：超时——单次 30s。<br><br>当前项目代码执行是裸 exec()（个人项目），但 MCP Server 的 Docker 隔离方案已设计好。</div>
+</div>
+
+<div class="qa" id="q92">
+  <div class="q"><span class="num">Q92</span>DAG、Tree、Chain 三种 Agent 架构的区别？怎么选？</div>
+  <div class="a"><strong>Chain：A → B → C，纯线性。Tree：A 分叉到 B/C/D，多级决策。DAG：节点间多入多出，允许复用和汇聚。</strong><br><br>选型：固定流程无分支 → Chain。单次路由多分支 → Tree（agent-notes 的架构）。需多节点汇合、循环、复用 → DAG。实际多数是 Tree + 循环边 = DAG。</div>
+</div>
+
+<div class="qa" id="q93">
+  <div class="q"><span class="num">Q93</span>怎么做内容安全审核？怎么防 Agent 输出有害内容？</div>
+  <div class="a"><strong>三层过滤：用户输入审核 → Agent 输出审核 → 工具参数审核。</strong><br><br>层 1：用户消息调 OpenAI Moderation API 做毒性检测。层 2：Agent 回答 Reflect 打分加安全维度。层 3：工具 args 调用前过白名单。<br><br>注意：不要用 LLM 自己做内容审核——专业 moderation API 经过红队测试。</div>
+</div>
+
+<div class="qa" id="q94">
+  <div class="q"><span class="num">Q94</span>数据泄露怎么防？Tool 和 State 哪些不能存？</div>
+  <div class="a"><strong>API Key、用户凭证、业务机密——绝对不能进 State 和 Trace。</strong><br><br>防泄漏：1. API Key 放 Context——State 序列化到 Trace 不含 Context。2. 工具返回截断——文件内容含密码时做正则检测。3. Trace 不存敏感信息。4. 数据库凭据用环境变量。<br><br>当前项目把 user_id 放 Context 而非 State——有意设计。放 State 则每次 LLM 调用注入 user_id → 浪费 Token + 安全风险。</div>
+</div>
+
+<div class="qa" id="q95">
+  <div class="q"><span class="num">Q95</span>Token 化怎么影响 Prompt 设计？</div>
+  <div class="a"><strong>Token ≠ 字符。中文一字 ≈ 2-3 Token，英文 ≈ 1 Token/词。</strong><br><br>直接影响：1. 中文 Prompt 比英文贵 2-3 倍——同样 System Prompt，中文版 Token 消耗是英文 150%。用英文 System Prompt 省 Token。2. 特殊符号更贵——Emoji 和特殊 Unicode 代价高。3. JSON 输出比纯文本省 Token——重复 key 被模型学会压缩。<br><br>实践：System Prompt 用英文写（除非中文客服场景）。Token 化是隐形成本——改几句话，Token 消耗可能差 30%。</div>
+</div>
+
 <!-- ========== 工程化 ========== -->
-<h2 id="engineering">八、工程化落地</h2>
+<h2 id="engineering">九、工程化落地</h2>
 
 <div class="qa" id="q28">
   <div class="q"><span class="num">Q28</span>怎么降低 Agent 系统延迟？</div>
@@ -308,7 +394,7 @@ footer a{color:var(--accent);text-decoration:none}
 </div>
 
 <!-- ========== 项目实战深挖 ========== -->
-<h2 id="project">九、项目实战深挖</h2>
+<h2 id="project">十、项目实战深挖</h2>
 
 <h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ Agent 学习助手（LangGraph Multi-Agent）</h3>
 
@@ -390,7 +476,7 @@ footer a{color:var(--accent);text-decoration:none}
 </div>
 
 <!-- ========== Agent 架构深挖 ========== -->
-<h2 id="agent-deep">十、Agent 学习助手——架构与工程深挖</h2>
+<h2 id="agent-deep">十一、Agent 学习助手——架构与工程深挖</h2>
 
 <h3 style="color:var(--green);margin:24px 0 16px;font-size:15px">▸ 架构设计决策</h3>
 
@@ -472,7 +558,7 @@ footer a{color:var(--accent);text-decoration:none}
 </div>
 
 <!-- ========== CodeTrail 架构深挖 ========== -->
-<h2 id="codetrail-deep">十一、CodeTrail——架构与工程深挖</h2>
+<h2 id="codetrail-deep">十二、CodeTrail——架构与工程深挖</h2>
 
 <h3 style="color:var(--accent2);margin:24px 0 16px;font-size:15px">▸ 架构设计决策</h3>
 
