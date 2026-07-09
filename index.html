@@ -132,6 +132,7 @@ footer a{color:var(--accent);text-decoration:none}
   <a href="#p6" class="post-card"><div class="post-num">06 · Runtime</div><div class="post-title">State / Store / Context 三层分离</div><div class="post-desc">LangGraph Runtime 机制、Context 安全注入、数据决策树</div></a>
   <a href="#p7" class="post-card"><div class="post-num">07 · 可观测性</div><div class="post-title">LangSmith + RAGAS</div><div class="post-desc">全链路 Tracing、节点级延迟分解、Token 统计、检索质量量化</div></a>
   <a href="#p8" class="post-card"><div class="post-num">08 · 面试</div><div class="post-title">项目讲解实战</div><div class="post-desc">30秒电梯演讲、2分钟架构讲解、诚实说不足、面试节奏控制</div></a>
+  <a href="#p9" class="post-card"><div class="post-num">09 · 项目</div><div class="post-title">CodeTrail 轨迹可视化</div><div class="post-desc">Next.js + ReactFlow 知识图谱、DAG 布局、Monaco Diff、流式回放、Zustand 状态机</div></a>
 </div>
 
 <!-- ===== 文章内容 ===== -->
@@ -318,6 +319,242 @@ Context ← 放运行时静态配置（user_id, max_tool_calls）
 <tr><td>Checkpointer</td><td>当前 MemorySaver，生产换 SqliteSaver/PostgresSaver</td></tr>
 <tr><td>HNSW 简化</td><td>selectNeighbors 没实现启发式剪枝，损失 5% 召回但代码量减半</td></tr>
 </table>
+
+<h2 id="p9">09 · CodeTrail — Agentic Coding 轨迹可视化平台</h2>
+
+<p><strong>一句话：</strong>将 AI 编程 Agent 的 trajectory.json 解析为知识图谱和交互式回放时间线。支撑大模型数据标注团队评估 Agent 行为质量。</p>
+
+<div class="note note-success"><strong>项目地址：</strong><a href="https://github.com/crimsonkingdde/codetrail" style="color:var(--accent)">github.com/crimsonkingdde/codetrail</a> &nbsp;·&nbsp; 独立开发 &nbsp;·&nbsp; 2026.07</div>
+
+<h3>技术栈全解</h3>
+<table>
+<tr><th>领域</th><th>技术</th><th>为什么选它</th></tr>
+<tr><td>框架</td><td>Next.js 16 (App Router)</td><td>文件系统路由 + RSC + SSG 开箱即用。选 16 而非 14 是因为 Turbopack 构建速度提升 5x</td></tr>
+<tr><td>语言</td><td>TypeScript (strict)</td><td>Trajectory 数据结构复杂（嵌套 tool_use/tool_result），没有类型定义寸步难行</td></tr>
+<tr><td>知识图谱</td><td>@xyflow/react (ReactFlow v12)</td><td>替代方案：D3.js（DOM 操作心智负担大）、vis-network（React 集成差）。ReactFlow 原生 React 组件，自定义节点/边/交互都无需操作原生 DOM</td></tr>
+<tr><td>图布局</td><td>dagre</td><td>JS 实现的 Sugiyama 分层布局算法。替代方案：ELK.js（功能更强但 800KB）、cose-bilkent（科学计算场景）。dagre 180KB，Top-to-Bottom 方向足够用</td></tr>
+<tr><td>代码 Diff</td><td>Monaco Editor (monaco-editor/react)</td><td>VS Code 同款编辑器内核。内置 DiffEditor 组件直接渲染 unified diff，自带语法高亮和 minimap。替代方案：react-diff-viewer（不支持语法高亮）、Shiki（只渲染不对比）</td></tr>
+<tr><td>状态管理</td><td>Zustand</td><td>替代 Redux（样板代码太多）、Jotai（原子化粒度不匹配）。Zustand 的 create() 返回 hook，不需要 Provider 包裹，对全 Client Component 架构最友好</td></tr>
+<tr><td>样式</td><td>Tailwind CSS v4</td><td>v4 用 @theme inline 替换 tailwind.config，不需要 PostCSS 插件链。0 个 CSS 文件，所有样式在 JSX className 里</td></tr>
+<tr><td>布局算法</td><td>dagre.graphlib</td><td>dagre 的底层图数据结构库。提供 Graph.setNode/Edge + layout() 自动分配 x/y 坐标</td></tr>
+</table>
+
+<h3>整体架构</h3>
+<pre><code>┌──────────────────────────────────────────────────────────┐
+│                    Browser (Client)                        │
+│  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │Uploder  │  │ Timeline │  │  Graph   │  │   Diff   │  │
+│  │ (拖拽)  │  │ (左侧栏) │  │ (中间区) │  │ (代码区) │  │
+│  └────┬────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  │
+│       │            │             │              │         │
+│       └────────────┴──────┬──────┴──────────────┘         │
+│                           │                                │
+│                    ┌──────▼──────┐                         │
+│                    │   Zustand   │  全局状态                │
+│                    │   Store     │  data/steps/currentStep  │
+│                    └──────┬──────┘                         │
+│                           │                                │
+│              ┌────────────┼────────────┐                   │
+│       ┌──────▼──────┐     │     ┌──────▼──────┐            │
+│       │   Parser    │     │     │GraphBuilder │            │
+│       │ (解析引擎)  │     │     │(图布局引擎) │            │
+│       └─────────────┘     │     └─────────────┘            │
+│                           │                                │
+│                    ┌──────▼──────┐                         │
+│                    │PlaybackCtrl │  setInterval 驱动        │
+│                    │(播放状态机) │  自动步进+调速           │
+│                    └─────────────┘                         │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>数据流</h3>
+<pre><code>trajectory.json 拖入
+      │
+      ▼
+FileReader.readAsText() → 字符串
+      │
+      ▼
+JSON.parse() → Trajectory 对象
+      │
+      ▼
+parseTrajectory() ─┬─ 遍历 trajectory[] 数组
+                   ├─ role==="user"  → 跳过(含 tool_result)
+                   ├─ role==="assistant" + string content
+                   │    └─ 正则提取 &lt;thinking&gt;...&lt;/thinking&gt;
+                   │    └─ 剩余文本 → type: "text"
+                   ├─ role==="assistant" + Array content
+                   │    ├─ type==="text"    → ParsedStep(type:"text")
+                   │    └─ type==="tool_use"→ ParsedStep(type:"tool_call")
+                   │
+                   ▼
+              ParsedStep[]
+                   │
+         ┌─────────┼──────────┐
+         ▼         ▼          ▼
+    Timeline   Knowledge    DiffView
+    (Timeline  Graph        (Monaco
+    列表)     (ReactFlow)   Editor)
+</code></pre>
+
+<h3>解析引擎核心实现</h3>
+<p>解析器是整个项目的入口——输入 trajectory.json 的完整 JSON 对象，输出结构化的 ParsedStep[] 数组。要同时处理两种 content 格式、&lt;thinking&gt; 标签提取、工具名称归一化。</p>
+
+<pre><code>// 核心解析逻辑（简化）
+function parseTrajectory(json) {
+  const steps = []
+  
+  for (const msg of json.trajectory) {
+    if (msg.role === "assistant") {
+      if (typeof msg.content === "string") {
+        // 场景1: 纯文本 → 拆分 thinking + text
+        const thoughts = extractThoughtBlocks(msg.content)
+        thoughts.forEach(t => steps.push({ type: "thought", content: t }))
+        // 剩余非 thinking 文本
+        const rest = msg.content.replace(/&lt;thinking&gt;[\s\S]*?&lt;\/thinking&gt;/g, "").trim()
+        if (rest) steps.push({ type: "text", content: rest })
+      } 
+      else if (Array.isArray(msg.content)) {
+        // 场景2: 多 block → text / tool_use
+        for (const block of msg.content) {
+          if (block.type === "tool_use")
+            steps.push({ type: "tool_call", toolName: block.name, ... })
+          else if (block.type === "text")
+            steps.push({ type: "text", content: block.text })
+        }
+      }
+    }
+  }
+  return steps
+}</code></pre>
+
+<div class="note note-warn"><strong>踩坑：</strong>content 可能是 string 或 Array&lt;object&gt;——同一个 Assistant 消息的 content 就有两种形态。一开始写死了 typeof === "string" 的路径，Array 格式的消息全部跳过。工具调用在时间线上不显示，排查了半小时才发现是类型分支遗漏。</div>
+
+<h3>知识图谱：dagre + ReactFlow 布局</h3>
+
+<p><strong>为什么不是 echarts/antv：</strong>两者的图布局是声明式 option 配置，不支持自定义 React 组件作为节点。我需要工具调用节点上显示参数摘要、文件节点显示路径、点击跳转步骤——这些都是 React 组件才能实现的交互。ReactFlow 每个节点是完整 React 组件。</p>
+
+<pre><code>// graph-builder 核心：steps → dagre 布局节点
+function buildGraph(steps, currentStep) {
+  const g = new dagre.graphlib.Graph()
+  g.setGraph({ rankdir: "TB", ranksep: 80, nodesep: 60 })
+  
+  steps.forEach((step, i) => {
+    const nodeId = `step-${i}`
+    g.setNode(nodeId, { width: 200, height: 80 })
+    
+    // tool_call → 读取 filePath → 创建文件节点 + 边
+    if (step.type === "tool_call") {
+      const filePath = extractFilePath(step)
+      if (filePath) {
+        g.setNode(fileId, { width: 180, height: 60 })
+        g.setEdge(nodeId, fileId) // tool→file 边
+      }
+    }
+  })
+  
+  dagre.layout(g) // 自动计算 x/y 坐标
+  return { nodes, edges }
+}</code></pre>
+
+<div class="note"><strong>Sugiyama 算法原理：</strong>dagre 的四步流程——(1) 去环：反转边消除有向环 (2) 分层：每个节点分配层号 rank (3) 排序：层内最小化交叉 (4) 定位：计算精确 x/y。graphlib 提供 setNode/setEdge API，dagre.layout() 原地写入坐标。</div>
+
+<div class="qa"><div class="q">Q: 节点数超过 100 个，dagre 布局会卡吗？</div><div class="a">dagre 时间复杂度 O(N²·L)（N=节点数，L=层数）。100 节点约 5ms 完成。瓶颈不在 dagre 而在 ReactFlow 的 DOM 渲染——解决方案是 ReactFlow 自带的节点虚拟化（nodesDraggable=false + onlyRenderVisibleElements=true），视口外节点不渲染 DOM，1000 节点也不卡。</div></div>
+
+<h3>播放状态机</h3>
+<pre><code>// Zustand Store 中的播放逻辑
+useEffect(() => {
+  if (isPlaying) {
+    const ms = 2000 / playbackSpeed  // 1x=2s/步, 4x=0.5s/步
+    timerRef.current = setInterval(nextStep, ms)
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }
+}, [isPlaying, playbackSpeed])
+
+// nextStep: 步进 + 自动暂停
+nextStep: () => {
+  if (currentStep < totalSteps - 1) set({ currentStep: currentStep + 1 })
+  else set({ isPlaying: false })  // 到末尾自动暂停
+}</code></pre>
+
+<div class="note note-warn"><strong>踩坑：</strong>React 19 中 useRef 签名变了——useRef&lt;ReturnType&lt;typeof setInterval&gt;&gt;() 报 Expected 1 arguments but got 0。因为 React 19 的 useRef 重载强制要求 initialValue。改为 useRef&lt;NodeJS.Timeout | null&gt;(null)，同时 useEffect cleanup 里判空再 clearInterval。</div></div>
+
+<h3>Monaco DiffEditor 集成</h3>
+<p>Monaco Editor 是 VS Code 的编辑器内核，@monaco-editor/react 是它的 React 封装。DiffEditor 内置 unified diff 渲染——直接传入 original 和 modified 两个字符串即可。</p>
+
+<pre><code>// 从 initial_state + final_diff 重建左右内容
+function buildLeftRight(initial, diff) {
+  const [filename, content] = Object.entries(initial)[0]
+  let patched = content
+  
+  // 简易 unified diff parser
+  // 解析 @@ -a,b +c,d @@ → 逐行应用 +/- 变更
+  for (const hunk of parseHunks(diff)) {
+    // 跳过删除行(-)，应用新增行(+)和前导空格行
+  }
+  
+  return { left: content, right: patched, filename }
+}
+
+// 组件中使用
+&lt;MonacoDiffEditor
+  original={left}
+  modified={right}
+  language="python"
+  options={{ readOnly: true, minimap: { enabled: false } }}
+/&gt;</code></pre>
+
+<div class="note note-success"><strong>关键决策 —— 为什么不是 Shiki/Prism：</strong>Shiki 只能渲染单文件高亮，DiffEditor 需要左右对比视图。Monaco 的 DiffEditor 组件自带双栏 + inner-line diff + 行号对齐 + 滚动同步，无需额外开发。代价是 2MB 的 Monaco Worker 加载（但 Next.js SSG 不会产生首屏负担）。</div>
+
+<h3>TypeScript 类型体系</h3>
+<pre><code>// 顶层 → 消息 → 内容块 三层嵌套
+type Trajectory = {
+  instance_id: string
+  metadata: { agent; model; thinking_mode; max_iterations }
+  instance: Instance   // 任务元数据 + git_context
+  trajectory: Message[] // 对话历史数组
+}
+
+type Message = {
+  role: "user" | "assistant"
+  content: string | AssistantContent[]  // ← 多态字段
+}
+
+type AssistantContent =
+  | { type: "text"; text: string }
+  | { type: "tool_use"; id: string; name: string; input: Record&lt;string, unknown&gt; }
+
+// 解析后的内部表示
+type ParsedStep = {
+  type: "thought" | "tool_call" | "tool_result" | "text"
+  toolName?: string
+  toolInput?: Record&lt;string, unknown&gt;
+  toolId?: string  // 用于 tool_use ↔ tool_result 关联
+}</code></pre>
+
+<h3>工程落地中的实际问题</h3>
+
+<div class="qa"><div class="q">问题1: ReactFlow 自定义节点投产后白色边框闪烁</div><div class="a">ReactFlow 内部用 React.memo 做节点 diff。自定义 AgentNode 传入的数据对象引用每次都变——Memo 失效，节点重新渲染。解决方案：useMemo 稳定 nodes 数组引用 + AgentNode 的 data 字段只传必要字段（用对象展开会导致引用变化）。</div></div>
+
+<div class="qa"><div class="q">问题2: trajectory 中 tool_use 的 id 和 tool_result 的 tool_use_id 不匹配</div><div class="a">解析器对两者不做硬校验（不匹配就跳过），但 Dashboard 统计中会标记"孤立调用"数量。真正的自洽性校验应该在数据生产环节做——标注平台入库前检查。</div></div>
+
+<div class="qa"><div class="q">问题3: Monaco Editor 在生产环境下加载 2-4 秒白屏</div><div class="a">Monaco 的 Worker 是异步 CDN 加载。SSG 首屏不渲染 Diff 视图（tab 切换时才挂载），首屏性能不受影响。如果要进一步优化：next.config 中配置 transpilePackages + 预加载 Monaco Worker URL。</div></div>
+
+<div class="qa"><div class="q">问题4: 样本数据中 final_diff 的补丁格式不完全标准</div><div class="a">GitHub PR 的 unified diff 有时包含 "No newline at end of file"、空 hunk、图片 binary diff 等非常规内容。当前的简易 parser 遇到这些会退化——跳过异常 hunk 直接展示原始内容。生产级方案应使用 diff 库（npm: diff）做规范 parse。</div></div>
+
+<div class="qa"><div class="q">问题5: 文件节点如果提取不到 filePath 怎么办</div><div class="a">extractFilePath 从 toolInput 中依次尝试 filePath → path → file → pattern（grep 用 pattern 而非 filePath）。都为空就跳过——不创建文件节点。这会导致图中某些 tool_call 节点没有文件关联边，不影响核心功能。</div></div>
+
+<h3>面试追问预判</h3>
+
+<div class="qa"><div class="q">Q: 你这个项目跟普通的 SWE-bench viewer 有什么本质区别？</div><div class="a">SWE-bench viewer 看的是"任务结果"——这个 issue 修没修好。CodeTrail 看的是"过程"——Agent 的每步思考、每个工具调用、文件修改的因果链。核心价值是可解释性：Agent 为什么改了 this file 而不是 that file？为什么在这里调了 3 次 read_file？所有推理路径可视化。</div></div>
+
+<div class="qa"><div class="q">Q: 知识图谱的布局算法你能讲讲原理吗？</div><div class="a">dagre 用的是 Sugiyama 分层布局——四步：(1) 去环——DFS 反向边消除有向环 (2) 分配层号——最长路径算法确保边只向下 (3) 层内排序——barycenter 重心法最小化交叉 (4) 坐标计算——brandes-köpf 快速水平坐标。dagre 选择了 O(N²·L) 而非 O(N³) 的实现，100 节点内 5ms 布局完成。</div></div>
+
+<div class="qa"><div class="q">Q: 为什么要用 Next.js 做这个项目？纯 React 不就行了吗？</div><div class="a">当前确实是 100% Client Component，Next.js 的服务端能力没用到。选 Next.js 是为后续扩展预留空间——计划加入 Server Action 做 trajectory 质量自动评分（调 AI 接口打分）、RSC 渲染分享页。如果只是原型，Vite 更轻——但这个项目定位是生产级工具。</div></div>
+
+<div class="qa"><div class="q">Q: Zustand 比 Redux 好在哪？你不怕全局状态混乱吗？</div><div class="a">Zustand 的 create() 返回 hook，组件里 usePlaybackStore(s => s.currentStep) 精确订阅单一字段——不像 Redux 的 useSelector 需要手动 shallowEqual。全局状态在这里是合理的——只有一个 trajectory 数据源，不是多页面多表单的复杂场景。如果以后加多个 trajectory 并行对比，再考虑拆 store。</div></div>
+
+<div class="qa"><div class="q">Q: 这个项目的数据从哪里来？能对接真实 Agent 吗？</div><div class="a">当前数据入口是 trajectory.json 文件上传。数据格式遵循 Anthropic Messages API + git_context 扩展字段——这是 SWE-bench 数据标注团队的输出规范。对接真实 Agent（如 Claude Code / CLINE）需要加个 adapter 层做格式转换——把 Agent 的原生日志转成 trajectory.json。技术难度不高，主要工作量在字段映射。</div></div>
+
+<div class="qa"><div class="q">Q: 性能方面你有什么考虑？</div><div class="a">四个关键点：(1) Monaco Editor 懒加载——只在切换到 Diff tab 时才 dynamic import (2) ReactFlow 节点虚拟化——视口外节点不渲染 DOM (3) 知识图谱布局用 useMemo 缓存——只有 steps 变化才重新计算 dagre (4) 播放引擎用 setInterval 而非 requestAnimationFrame——不需要逐帧动画，步骤粒度足够。实测 100 步轨迹 timeline 渲染 &lt; 50ms，图谱布局 &lt; 5ms。</div></div>
 
 </article>
 
