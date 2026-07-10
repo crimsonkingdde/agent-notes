@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前端开发面试题库 — AgentNotes</title>
+<style>
+:root{--bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#c9d1d9;--text2:#8b949e;--accent:#58a6ff;--accent2:#f78166;--green:#3fb950;--warn:#d2991d;--code-bg:#0d1117}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.container{max-width:860px;margin:0 auto;padding:0 24px}
+header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+header .container{display:flex;align-items:center;justify-content:space-between}
+header .logo{font-size:20px;font-weight:700;color:#fff;text-decoration:none}
+header .logo span{color:var(--accent)}
+header nav{display:flex;align-items:center;gap:20px}
+header nav a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}
+header nav a:hover{color:var(--accent)}
+header nav a.active{color:var(--accent);font-weight:600}
+.hero{padding:60px 0 40px;text-align:center}
+.hero h1{font-size:32px;font-weight:800;color:#fff;margin-bottom:12px}
+.hero p{font-size:15px;color:var(--text2);max-width:560px;margin:0 auto}
+.stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;text-align:center;min-width:100px}
+.stat-card .num{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-card .label{font-size:12px;color:var(--text2);margin-top:4px}
+.toc{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:40px}
+.toc h2{font-size:16px;color:#fff;margin-bottom:12px}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.toc-grid a{color:var(--text2);text-decoration:none;font-size:13px;padding:4px 0;transition:color .2s}
+.toc-grid a:hover{color:var(--accent)}
+article{padding:0 0 80px}
+article h2{font-size:20px;color:#fff;margin:48px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--accent)}
+article h3{font-size:16px;color:var(--accent);margin:32px 0 8px}
+.qa{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin:16px 0;transition:border-color .2s}
+.qa:hover{border-color:var(--accent)}
+.qa .q{font-weight:700;font-size:15px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
+.qa .q .num{color:var(--accent);font-size:13px;min-width:28px;padding-top:2px}
+.qa .a{font-size:14px;line-height:1.8;padding-left:38px}
+.qa .a strong{color:var(--accent2)}
+.qa .a code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;color:#79c0ff}
+pre{background:var(--code-bg);padding:14px 18px;border-radius:8px;overflow-x:auto;margin:10px 0;font-size:13px;line-height:1.6;border:1px solid var(--border);color:var(--text)}
+.note{background:rgba(88,166,255,.08);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:13px}
+.note-warn{background:rgba(210,153,29,.08);border-left-color:var(--warn)}
+.note-success{background:rgba(63,185,80,.08);border-left-color:var(--green)}
+footer{background:var(--bg-card);border-top:1px solid var(--border);padding:32px 0;text-align:center;color:var(--text2);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:768px){.stats{gap:8px}.stat-card{padding:12px 16px;min-width:80px}.stat-card .num{font-size:20px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="/agent-notes/" class="logo">Agent<span>Notes</span></a>
+    <nav>
+      <a href="/agent-notes/">首页</a>
+      <a href="/agent-notes/interview.html">Agent题库</a>
+      <a href="/agent-notes/frontend-interview.html" class="active">前端题库</a>
+      <a href="https://github.com/crimsonkingdde">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>前端开发面试题库</h1>
+  <p>React / TypeScript / JavaScript / 模块化 / 组件化 / 工程化。面向字节跳动前端实习生面试准备。</p>
+</section>
+
+<div class="container">
+
+<div class="toc">
+  <h2>目录</h2>
+  <div class="toc-grid">
+    <a href="#react">React 核心 (Q1-Q12)</a>
+    <a href="#hooks">Hooks 深入 (Q13-Q18)</a>
+    <a href="#typescript">TypeScript (Q19-Q25)</a>
+    <a href="#js">JavaScript 基础 (Q26-Q32)</a>
+    <a href="#modular">模块化与组件化 (Q33-Q38)</a>
+    <a href="#engineering">工程化 (Q39-Q45)</a>
+    <a href="#lynx">Lynx 与跨端 (Q46-Q48)</a>
+    <a href="#internship">实习追问 (Q49-Q55)</a>
+  </div>
+</div>
+
+<article>
+
+<!-- ========== React 核心 ========== -->
+<h2 id="react">一、React 核心</h2>
+
+<div class="qa" id="q1">
+  <div class="q"><span class="num">Q1</span>React 的虚拟 DOM 是什么？为什么不直接操作真实 DOM？</div>
+  <div class="a"><strong>虚拟 DOM 是一个轻量级的 JS 对象树，描述 UI 结构。真实 DOM 操作昂贵——每次修改触发重排重绘。</strong><br><br>React 的做法：状态变化 → 生成新的虚拟 DOM 树 → 与旧的 Diff（Reconciliation）→ 只更新变化的部分到真实 DOM。<br><br>本质是用<strong> JS 计算的低成本换 DOM 操作的高成本</strong>。JS 对象 diff 微秒级，真实 DOM repaint 毫秒级。<br><br>但虚拟 DOM 不是银弹——对于静态页面，它反而多了 diff 开销。React 19 引入 React Compiler 自动 memo，就是减少不必要的 diff。</div>
+</div>
+
+<div class="qa" id="q2">
+  <div class="q"><span class="num">Q2</span>React Diff 算法是怎么工作的？</div>
+  <div class="a"><strong>三个假设下的 O(n) 算法：</strong><br><br>1. 不同类型元素 → 直接替换整个子树（div 变 span，全销毁重建）。2. 同类型元素 → 只更新变化的属性。3. 列表用 key 做最小移动。<br><br>为什么 O(n)：不跨层比较（假设 DOM 层级不会大变），同层只比较位置。传统树 diff 是 O(n^3)。<br><br>key 为什么不能是 index：删了第一项，后面的 index 全变了——React 认为所有项都变了，全部重新渲染。应该用稳定的唯一 ID。</div>
+</div>
+
+<div class="qa" id="q3">
+  <div class="q"><span class="num">Q3</span>React Fiber 是什么？解决了什么问题？</div>
+  <div class="a"><strong>Fiber 是 React 16 重写的调和引擎——把同步不可中断的渲染变成异步可中断的增量渲染。</strong><br><br>之前（Stack Reconciler）：组件树渲染是递归，一旦开始就不可中断。1000 个组件更新 → JS 线程被占满 → 浏览器没法处理用户输入 / 动画 → 掉帧。<br><br>Fiber：把渲染拆成工作单元——每个 Fiber Node 做一小段，做完让出主线程给浏览器。requestIdleCallback / Scheduler 调度优先级。<br><br>架构：Scheduler（调度）→ Reconciler（调和，标记变更）→ Renderer（渲染到 DOM）。</div>
+</div>
+
+<div class="qa" id="q4">
+  <div class="q"><span class="num">Q4</span>React 渲染流程（从 setState 到页面更新）完整讲一下。</div>
+  <div class="a">1. setState 触发 → 标记组件为 dirty → 加入更新队列。<br>2. Scheduler 根据优先级（用户交互 > 数据请求）分配时间片。<br>3. Reconciler 从根节点遍历 Fiber 树——对比新旧状态，标记 effect tag（Placement/Update/Deletion）。<br>4. Commit 阶段——同步不可中断，批量应用 effect tag 到真实 DOM。<br>5. 触发 useEffect/useLayoutEffect。</div>
+</div>
+
+<div class="qa" id="q5">
+  <div class="q"><span class="num">Q5</span>React.memo、useMemo、useCallback 的区别和使用场景？</div>
+  <div class="a"><strong>React.memo：缓存组件</strong>——props 不变就不重新渲染。适合纯展示组件。<br><strong>useMemo：缓存值</strong>——依赖不变就返回旧值。适合昂贵计算。<br><strong>useCallback：缓存函数</strong>——依赖不变就返回同一个函数引用。适合传给子组件的回调。<br><br>坑：不要无脑加 memo。加 memo 本身也有内存和比较开销。应该先用 React DevTools Profiler 找到真正慢的组件，再 memo。</div>
+</div>
+
+<div class="qa" id="q6">
+  <div class="q"><span class="num">Q6</span>React 中 state 和 props 的区别？</div>
+  <div class="a"><strong>Props：父组件传进来，只读。</strong>子组件不能改自己的 props。<br><strong>State：组件自己管理，可读写。</strong>setState 触发的更新是异步批量的。<br><br>理解：React 的数据流是单向的——数据从父组件的 state 通过 props 流向子组件。这就是"状态提升"的思想——共享状态放在最近的公共父组件里。</div>
+</div>
+
+<div class="qa" id="q7">
+  <div class="q"><span class="num">Q7</span>React 18 并发特性（Concurrent Mode）是什么？有什么用？</div>
+  <div class="a"><strong>并发不是并行——是让 React 可以"暂停"低优先级渲染，先处理高优先级的。</strong><br><br>核心 API：useTransition——标记低优先级更新，React 可以中断它。useDeferredValue——延迟更新某个值，保持 UI 响应。<br><br>实际场景：用户搜索框输入 → 搜索结果列表渲染慢 → 用 useTransition 让输入框保持响应，列表"稍后"更新。用户不会觉得卡。</div>
+</div>
+
+<div class="qa" id="q8">
+  <div class="q"><span class="num">Q8</span>React 组件的生命周期（类组件 vs 函数组件）</div>
+  <div class="a"><strong>类组件</strong>：componentDidMount → componentDidUpdate → componentWillUnmount。每个阶段有独立方法。<br><strong>函数组件 + Hooks</strong>：useEffect 统一了这三个阶段——mount（空依赖[]）、update（有依赖）、unmount（return cleanup 函数）。<br><br>为什么从 class 切到 hooks：1. this 绑定让人头疼。2. 同一逻辑散落在不同生命周期里（订阅在 mount 里，取消在 unmount 里）。3. hooks 让逻辑复用变简单——自定义 hook 抽出去给多个组件用。</div>
+</div>
+
+<div class="qa" id="q9">
+  <div class="q"><span class="num">Q9</span>React 中的合成事件（SyntheticEvent）是什么？</div>
+  <div class="a"><strong>React 不直接把事件绑在元素上——而是委托到根元素的统一事件监听，然后封装成 SyntheticEvent 对象。</strong><br><br>好处：1. 兼容不同浏览器的原生事件差异。2. 事件池化——复用事件对象，减少 GC。3. 性能——不需要给每个元素绑事件。<br><br>注意：React 17 以后事件委托从 document 改为 root 节点，解决多个 React 版本共存时 e.stopPropagation() 失效的问题。</div>
+</div>
+
+<div class="qa" id="q10">
+  <div class="q"><span class="num">Q10</span>React 中的 key 为什么不能用 index？</div>
+  <div class="a">数组：[A, B, C] → 删 A → [B, C]。<br><br>用 index：之前 key=0 是 A，现在 key=0 是 B——React 认为 B 是之前的 A 被修改了，C 是之前的 B 被修改了，item 没变但全部重渲染。<br><br>用 id：React 知道 A 被删了、B 和 C 没变——只删 A 的 DOM 节点，B 和 C 不动。<br><br>后果：input 输入框——用 index 你在输入框中输入的文字会跑到另一个位置去。</div>
+</div>
+
+<div class="qa" id="q11">
+  <div class="q"><span class="num">Q11</span>React 的错误边界（Error Boundary）是什么？</div>
+  <div class="a"><strong>类组件实现的 componentDidCatch + getDerivedStateFromError，捕获子组件渲染错误，防止整个页面白屏。</strong><br><br>不能捕获：异步错误（setTimeout）、事件处理错误、服务端渲染错误、Error Boundary 自身的错误。<br><br>函数组件做不到 Error Boundary——因为 Hooks 没有对等的生命周期。需要写 class 组件或用 react-error-boundary 库。</div>
+</div>
+
+<div class="qa" id="q12">
+  <div class="q"><span class="num">Q12</span>React 18 的 Automatic Batching 是什么？</div>
+  <div class="a"><strong>之前：只有 React 事件处理里的 setState 会合并。setTimeout/Promise/原生事件里的多次 setState 各触发一次渲染。</strong><br><br>React 18：所有场景自动合并——同一个同步代码块里多次 setState → 一次渲染。<br><br>如果不想合并：用 flushSync() 强制同步更新。但一般不需要——批量更新是性能优化。</div>
+</div>
+
+<!-- ========== Hooks ========== -->
+<h2 id="hooks">二、Hooks 深入</h2>
+
+<div class="qa" id="q13">
+  <div class="q"><span class="num">Q13</span>useState 的原理是什么？为什么 hooks 不能放在条件语句里？</div>
+  <div class="a"><strong>React 用链表存储 hooks 状态——调用顺序决定对应哪个状态。</strong><br><br>组件渲染时：第一个 useState 绑定到 hooks 链表的第一个节点，第二个 useState 绑定到第二个节点...<br><br>如果你把 useState 放到 if 里：第一次渲染有 3 个 hooks [A, B, C]，第二次只有 2 个 [A, C]——React 把 C 的值当 B 的值，全乱了。<br><br>这就是"hooks 规则"的根本原因——不是代码规范，是底层实现决定的。</div>
+</div>
+
+<div class="qa" id="q14">
+  <div class="q"><span class="num">Q14</span>useEffect 和 useLayoutEffect 的区别？什么时候用哪个？</div>
+  <div class="a"><strong>useEffect：异步执行，不阻塞浏览器渲染。</strong>适合数据请求、订阅、日志——不需要立刻看到结果的操作。<br><strong>useLayoutEffect：同步执行，在浏览器 painting 之前运行。</strong>适合需要立即看到的 DOM 操作——读取布局信息、修改 DOM 避免闪烁。<br><br>典型场景：用 ref 测量元素高度 → 必须在 painting 前拿到值 → 用 useLayoutEffect。否则会看到"闪烁"——先渲染旧高度再跳到新高度。<br><br>默认用 useEffect，只在确实需要阻塞渲染时才用 useLayoutEffect。</div>
+</div>
+
+<div class="qa" id="q15">
+  <div class="q"><span class="num">Q15</span>useRef 除了引用 DOM 还有什么用？</div>
+  <div class="a"><strong>保存任意可变值，改它不触发重渲染。</strong><br><br>1. 保存前一个值——useRef(prevValue) 配合 useEffect 做"上一次是什么"。<br>2. setInterval 的 timer ID——用 ref 存，cleanup 时 clear。<br>3. 保存不需要触发重渲染的数据——比如 WebSocket 实例、动画 ID。<br><br>和 state 的核心区别：state 变了重渲染，ref 不变。如果你有一个值的改变不需要反映在 UI 上→用 ref。</div>
+</div>
+
+<div class="qa" id="q16">
+  <div class="q"><span class="num">Q16</span>自定义 Hook 怎么设计？给你一个场景怎么写？</div>
+  <div class="a"><strong>场景：做一个 useDebounce hook——用户输入后延迟 N ms 才更新值。</strong><br><br><pre>function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}</pre><br>设计原则：1. 以 use 开头（React 强制要求，否则 lint 报错）。2. 输入是参数，输出是值和/或方法。3. 内部用 useState/useEffect 管理状态。4. 可复用——不跟任何组件耦合。</div>
+</div>
+
+<div class="qa" id="q17">
+  <div class="q"><span class="num">Q17</span>useEffect 的依赖数组什么时候可以不写？</div>
+  <div class="a"><strong>永远不要省略依赖数组。</strong><br><br>不写 → 每次渲染都执行（通常不是你想要的）。写空数组[] → 只 mount 一次。写依赖 → 依赖变了才执行。<br><br>常见错误：在 useEffect 里用了某个 state，但依赖数组忘了写它 → 闭包陷阱——effect 里拿到的永远是初始值。<br><br>React 18 Strict Mode 会故意执行两次 mount/unmount，帮你暴露缺少 cleanup 或副作用不正确的问题。</div>
+</div>
+
+<div class="qa" id="q18">
+  <div class="q"><span class="num">Q18</span>useReducer 和 useState 怎么选？</div>
+  <div class="a"><strong>简单状态用 useState，复杂状态逻辑用 useReducer。</strong><br><br>useState：toggle、input value、简单 boolean。<br>useReducer：多子状态相互依赖（如购物车——加商品要同时更新总价、数量、选中状态），或下一个 state 依赖上一个 state。<br><br>useReducer 的优势：1. reducer 是纯函数，可测试。2. dispatch 引用稳定，不会导致子组件重渲染。3. 复杂状态更新逻辑集中管理。<br><br>不是"复杂就用 Redux"——很多场景 useReducer + Context 就够了。</div>
+</div>
+
+<!-- ========== TypeScript ========== -->
+<h2 id="typescript">三、TypeScript</h2>
+
+<div class="qa" id="q19">
+  <div class="q"><span class="num">Q19</span>TypeScript 的泛型是什么？什么时候用？</div>
+  <div class="a"><strong>泛型 = 类型参数。让函数/类/接口不写死类型，而是调用时再确定。</strong><br><br><pre>// 不用泛型：any，失去类型安全
+function identity(arg: any): any { return arg }
+
+// 用泛型：输入什么类型，输出就是什么类型
+function identity&lt;T&gt;(arg: T): T { return arg }
+identity(5)      // T = number
+identity("hi")   // T = string</pre><br>核心思想：<strong>类型变成了变量</strong>——你可以在函数签名里传类型参数。泛型约束 extends 可以限制 T 必须有某些属性。</div>
+</div>
+
+<div class="qa" id="q20">
+  <div class="q"><span class="num">Q20</span>TypeScript 的联合类型和交叉类型有什么区别？</div>
+  <div class="a"><strong>联合类型 (|)：满足其中一个就行。</strong><code>string | number</code>——要么字符串要么数字。<br><strong>交叉类型 (&)：必须同时满足。</strong><code>{a:1} & {b:2}</code>——必须有 a 也有 b。<br><br>实战：<pre>// 联合——API 返回两种可能
+type Response = Success | Error
+
+// 交叉——组合多个接口
+type User = BaseInfo & ContactInfo & Permissions
+
+// 用 in 收窄联合类型
+if ('status' in response && response.status === 200) { /* Success */ }</pre></div>
+</div>
+
+<div class="qa" id="q21">
+  <div class="q"><span class="num">Q21</span>TypeScript 的 type 和 interface 的区别？什么时候用哪个？</div>
+  <div class="a"><strong>interface：可被 extends 和 implements，支持声明合并（同名 interface 自动合并）。适合定义对象的形状、类的契约。</strong><br><strong>type：能做联合/交叉/映射类型，不能声明合并。适合类型别名、联合类型、工具类型。</strong><br><br>实践：定义 API 请求/响应用 interface（可能被 extends），定义状态联合类型用 type（type Status = 'loading' | 'success' | 'error'）。<br><br>多数场景两者可以互换。团队规范决定一致性。</div>
+</div>
+
+<div class="qa" id="q22">
+  <div class="q"><span class="num">Q22</span>TypeScript 的工具类型（Utility Types）用过哪些？</div>
+  <div class="a"><strong>Partial&lt;T&gt;：所有属性变可选。</strong>做表单草稿——更新接口但可以只传部分字段。<br><strong>Required&lt;T&gt;：所有属性变必选。</strong><br><strong>Pick&lt;T, K&gt;：从 T 里挑几个属性。</strong>做权限控制——从 User 类型里只暴露 name 和 avatar。<br><strong>Omit&lt;T, K&gt;：从 T 里排除几个属性。</strong>做请求体——从 User 里去掉 id 和 createdAt。<br><strong>Record&lt;K, V&gt;：构造一个 Key-Value 字典。</strong>状态配置表——<code>Record&lt;'pending'|'approved'|'rejected', {btn:string}&gt;</code>。<br><strong>ReturnType&lt;T&gt;：获取函数返回值类型。</strong><br><br>项目里用得最多的是 Pick/Omit/Record——拆请求体和响应体时非常实用。</div>
+</div>
+
+<div class="qa" id="q23">
+  <div class="q"><span class="num">Q23</span>TypeScript 的类型守卫（Type Guard）是什么？怎么用？</div>
+  <div class="a"><strong>类型守卫让 TS 在条件分支里自动收窄类型。</strong><br><br><pre>// typeof 守卫
+function pad(value: string | number) {
+  if (typeof value === "number") return value + 1  // TS 知道是 number
+  return value.padStart(10, "0")  // TS 知道是 string
+}
+
+// in 守卫
+if ("status" in response) { /* response: Success */ }
+
+// 自定义守卫 (is 关键字)
+function isString(val: any): val is string {
+  return typeof val === "string"
+}</pre><br>这是 TS 最常用的特性之一——处理联合类型时让编译器自动推断分支类型。</div>
+</div>
+
+<div class="qa" id="q24">
+  <div class="q"><span class="num">Q24</span>TypeScript 的 any 和 unknown 有什么区别？</div>
+  <div class="a"><strong>any：关闭类型检查。可以赋值给任何类型，可以调任何方法。不安全。</strong><br><strong>unknown：类型安全的"any"。</strong>不能直接操作，必须先类型收窄。<br><br><pre>let a: any = "hello"; a.toUpperCase()  // OK，但可能运行时炸
+let b: unknown = "hello"; b.toUpperCase()  // TS 报错！必须收窄
+if (typeof b === "string") b.toUpperCase()  // 收窄后 OK</pre><br>原则：永远不用 any。API 返回未知类型用 unknown，JSON.parse 返回 unknown，然后做类型守卫收窄。</div>
+</div>
+
+<div class="qa" id="q25">
+  <div class="q"><span class="num">Q25</span>TypeScript 如何做模块声明——声明一个没有 @types 的第三方库？</div>
+  <div class="a"><strong>写 .d.ts 声明文件。</strong><br><br><pre>// types/my-lib.d.ts
+declare module 'my-lib' {
+  export function doSomething(param: string): number
+  export interface Config {
+    key: string
+  }
+}</pre><br>TS 会自动读取项目里的 .d.ts 文件。这是 declare module 的用途——给没有类型定义的 JS 库补类型。<br><br>declare 关键字表示"我只声明类型，不生成 JS 代码"——编译后 .d.ts 文件会被丢弃。</div>
+</div>
+
+<!-- ========== JS基础 ========== -->
+<h2 id="js">四、JavaScript 基础</h2>
+
+<div class="qa" id="q26">
+  <div class="q"><span class="num">Q26</span>JavaScript 的事件循环（Event Loop）讲一下。</div>
+  <div class="a"><strong>JS 是单线程的——通过事件循环实现异步。</strong><br><br>调用栈 → 遇到异步任务 → 交给 Web API → 异步完成 → 回调推到任务队列 → 调用栈空了 → 取任务队列的第一个执行。<br><br>宏任务：setTimeout、setInterval、I/O。<br>微任务：Promise.then、MutationObserver、queueMicrotask。<br><br>执行顺序：<strong>一个宏任务 → 清空所有微任务 → 渲染 → 下一个宏任务。</strong><br><br>这就是 Promise.then 的 callback 比 setTimeout 先执行的原因——微任务优先级高于宏任务。</div>
+</div>
+
+<div class="qa" id="q27">
+  <div class="q"><span class="num">Q27</span>闭包是什么？什么时候用？会有什么问题？</div>
+  <div class="a"><strong>函数能访问它定义时所在作用域的变量——即使函数在别的地方被调用。</strong><br><br>用途：数据私有化、函数工厂、柯里化。<br><br><pre>function createCounter() {
+  let count = 0  // 私有变量
+  return () => ++count
+}
+const counter = createCounter()
+counter() // 1
+counter() // 2</pre><br>闭包陷阱——useEffect 里拿到的 state 是旧值：因为 effect 的 callback 在渲染时创建，闭包里捕获了当时的 state 值。解决方案：把最新的值放进 ref。</div>
+</div>
+
+<div class="qa" id="q28">
+  <div class="q"><span class="num">Q28</span>原型链是什么？prototype 和 __proto__ 的区别？</div>
+  <div class="a"><strong>JS 通过原型链实现继承——对象通过 __proto__ 指向它的原型，形成链条。</strong><br><br>prototype：函数独有属性。当 new 一个构造函数时，新对象的 __proto__ 指向构造函数的 prototype。<br>__proto__：每个对象都有，指向它继承的父对象。<br><br><pre>function Dog() {}
+Dog.prototype.bark = () => "woof"
+const d = new Dog()
+d.bark()  // 在 d 上没找到 → 去 d.__proto__ (Dog.prototype) 找到</pre><br>class 语法只是原型链的语法糖——底层还是原型继承。</div>
+</div>
+
+<div class="qa" id="q29">
+  <div class="q"><span class="num">Q29</span>this 指向规则（四种绑定）</div>
+  <div class="a"><strong>1. 默认绑定</strong>：独立函数调用 → this = window（严格模式 undefined）。<br><strong>2. 隐式绑定</strong>：obj.fn() → this = obj。<br><strong>3. 显式绑定</strong>：fn.call(obj) / fn.apply(obj) / fn.bind(obj)。<br><strong>4. new 绑定</strong>：new Fn() → this = 新创建的对象。<br><br>优先级：new > 显式 > 隐式 > 默认。<br><br><strong>箭头函数没有自己的 this</strong>——继承外层作用域的 this。这就是 React 里箭头函数做 callback 不需要 .bind(this) 的原因。</div>
+</div>
+
+<div class="qa" id="q30">
+  <div class="q"><span class="num">Q30</span>Promise 和 async/await 的关系？async/await 怎么实现的？</div>
+  <div class="a"><strong>async/await 是 Promise 的语法糖——让异步代码看起来像同步。</strong><br><br>async 函数返回的是 Promise。await 后面的代码相当于 .then()。try/catch 相当于 .catch()。<br><br>底层：Generator + Promise。async 函数被编译为一个 Generator，await 对应 yield。外层用自动执行器递归调用 .next()——每次 yield 出 Promise，等它 resolve 再调 next()。<br><br>这就是为什么 await 只能在 async 里用——因为需要 Generator 的自动执行器。</div>
+</div>
+
+<div class="qa" id="q31">
+  <div class="q"><span class="num">Q31</span>防抖和节流的区别？各自的使用场景？</div>
+  <div class="a"><strong>防抖：等用户停止操作 N ms 后才执行。连续触发只执行最后一次。</strong>→ 搜索框输入、窗口 resize。<br><strong>节流：每 N ms 只执行一次。连续触发定期执行。</strong>→ 滚动加载、按钮点击防重复提交。<br><br><pre>// 防抖
+function debounce(fn, delay) {
+  let timer
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// 节流
+function throttle(fn, interval) {
+  let last = 0
+  return (...args) => {
+    const now = Date.now()
+    if (now - last >= interval) { fn(...args); last = now }
+  }
+}</pre><br>你的 CodeTrail 里播放引擎用的就是节流——setInterval 控制步骤推进频率。</div>
+</div>
+
+<div class="qa" id="q32">
+  <div class="q"><span class="num">Q32</span>深拷贝和浅拷贝的区别？怎么实现深拷贝？</div>
+  <div class="a"><strong>浅拷贝：只复制第一层属性，第二层共享引用。</strong>Object.assign、展开运算符。<br><strong>深拷贝：递归复制所有层级，完全独立。</strong>JSON.parse(JSON.stringify(obj))、structuredClone()、手写递归。<br><br>JSON 方式的坑：无法拷贝 undefined、函数、Symbol、循环引用（直接报错）。<br><br>structuredClone：原生 API，支持循环引用、大部分类型。但不支持函数和 DOM 节点。<br><br><strong>实际项目中用 Immer 做不可变更新</strong>——不需要深拷贝整个对象，只在修改的地方创建新引用。</div>
+</div>
+
+<!-- ========== 模块化/组件化 ========== -->
+<h2 id="modular">五、模块化与组件化</h2>
+
+<div class="qa" id="q33">
+  <div class="q"><span class="num">Q33</span>ES Module 和 CommonJS 的区别？</div>
+  <div class="a"><strong>ES Module：import/export，静态分析，编译时确定依赖。</strong>Tree-shaking 的基础——打包工具能在编译时知道哪些导出没用到。<br><strong>CommonJS：require/module.exports，运行时加载。</strong>Node.js 的默认模块系统。<br><br>关键差异：import 会提升（不管写在哪里，都在代码执行前处理），require 在代码执行到那一行才加载。import 导出的是<strong>引用</strong>（原模块改了，导入方也跟着变），require 导出的是<strong>值的拷贝</strong>。</div>
+</div>
+
+<div class="qa" id="q34">
+  <div class="q"><span class="num">Q34</span>你是怎么理解组件化的？你平时怎么做组件拆分？</div>
+  <div class="a"><strong>组件化 = 界面拆成独立、可复用的单元。每个组件有自己明确的输入（props）和输出（回调）。</strong><br><br>拆分原则：1. 单一路径——如果组件有多个 if-else 分支渲染完全不同内容，拆。2. 复用需求——同一段 UI 在 3 个页面出现，拆成共享组件。3. 独立变化——不同原因才变化的内容拆开。<br><br>实际做法：先用一个大的 Page 组件写功能，run 通了再看哪些可以提出来。不要一开始就过度拆分——组件边界不清晰时乱拆反而增加沟通成本。</div>
+</div>
+
+<div class="qa" id="q35">
+  <div class="q"><span class="num">Q35</span>什么场景用 Context，什么场景用状态管理库（Redux/Zustand）？</div>
+  <div class="a"><strong>Context：跨层级传少量不变数据</strong>——主题、语言、用户信息。变了会导致所有消费者重渲染。<br><strong>状态管理库：频繁变化的全局状态</strong>——购物车、表单数据。精确订阅只让相关组件更新。<br><br>如果你只有 2-3 层嵌套，直接 props 传就行，不需要 Context。如果全局状态频繁变、订阅粒度要细→ Zustand/Redux。<br><br>你的 CodeTrail 用的 Zustand——因为只有一个 trajectory 数据源，Zustand 的精准订阅比 Context 的全量重渲染性能好。</div>
+</div>
+
+<div class="qa" id="q36">
+  <div class="q"><span class="num">Q36</span>组件之间的通信方式有哪些？</div>
+  <div class="a"><strong>父传子：Props。</strong>最基础的方式。<br><strong>子传父：回调函数。</strong>父把 setState 通过 props 传给子。<br><strong>兄弟组件：状态提升。</strong>共享状态放到最近的公共父组件。<br><strong>跨层级：Context 或 状态管理库。</strong><br><strong>跨页面/跨标签页：URL 参数、localStorage + storage 事件、BroadcastChannel。</strong><br><br>你的 Sky-Chat 里用 BroadcastChannel 做跨标签页同步——一个标签登录了，其他标签自动更新登录状态。</div>
+</div>
+
+<div class="qa" id="q37">
+  <div class="q"><span class="num">Q37</span>什么是高阶组件（HOC）？和 Hooks 比有什么优劣？</div>
+  <div class="a"><strong>HOC：函数接收一个组件，返回一个新组件。</strong>用于注入公共逻辑（权限、日志、数据请求）。<br><br>HOC 的问题：1. 嵌套地狱——多个 HOC 包裹导致组件树很深。2. Props 命名冲突——HOC 注入的 props 可能和原组件冲突。<br><br>Hooks 替代了 HOC 的绝大多数使用场景——逻辑复用用自定义 Hook，不需要套一层组件。现在 HOC 主要用于无法用 Hooks 的场景（如 Error Boundary——因为 Hooks 没有对等 API）。</div>
+</div>
+
+<div class="qa" id="q38">
+  <div class="q"><span class="num">Q38</span>你在项目中是怎么做组件性能优化的？</div>
+  <div class="a"><strong>不是"加 memo 就完事了"，而是先定位再优化。</strong><br><br>我的流程：1. React DevTools Profiler 录一段操作，找出渲染最慢的组件。2. 看它为什么渲染——props 引用变了？父组件 re-render 连带？还是 state 真的变了？3. 针对性优化：props 引用稳定用 useMemo/useCallback；纯展示组件用 React.memo；大列表用虚拟滚动（react-window/ReactVirtuoso）；流式更新用 buffer + rAF 批量刷新。<br><br>不要提前优化——代码写完跑 Profiler，数据说话。</div>
+</div>
+
+<!-- ========== 工程化 ========== -->
+<h2 id="engineering">六、工程化</h2>
+
+<div class="qa" id="q39">
+  <div class="q"><span class="num">Q39</span>Webpack 的核心原理是什么？loader 和 plugin 的区别？</div>
+  <div class="a"><strong>Webpack 把一切文件当模块——JS/CSS/图片/字体，通过 loader 和 plugin 处理成最终产物。</strong><br><br>核心流程：entry → 解析依赖图 → loader 转换文件 → plugin 介入打包过程 → output 产出。<br><br>Loader：文件级别的转换器。Webpack 遇到 .css 文件 → 交给 css-loader 和 style-loader 处理。链式调用，从右到左。<br>Plugin：构建级别的扩展。在打包的不同生命周期插逻辑——开始构建时、产出前、完成后。可以访问 Webpack 内部的 compiler 和 compilation 对象。<br><br>常见 loader：babel-loader（JS 转译）、css-loader、ts-loader。常见 plugin：HtmlWebpackPlugin（生成 HTML）、TerserPlugin（压缩 JS）。</div>
+</div>
+
+<div class="qa" id="q40">
+  <div class="q"><span class="num">Q40</span>Vite 为什么比 Webpack 快？</div>
+  <div class="a"><strong>Vite 开发时不打包——利用浏览器原生 ES Module 按需加载。</strong><br><br>Webpack dev：每次改动 → 重新打包整个 bundle → HMR 推送。项目越大越慢。<br>Vite dev：请求哪个文件 → 用 esbuild 预编译依赖（快 10-100 倍）→ 源码按需编译，只编译当前请求的模块。<br><br>生产构建：Vite 用 Rollup 打包——因为 ES Module 太多请求不适合生产环境。<br><br>简单说：Vite 开发快因为不打包，Webpack 开发慢因为每次都要打包。生产环境两者都用打包（Rollup vs Webpack），差距不大。</div>
+</div>
+
+<div class="qa" id="q41">
+  <div class="q"><span class="num">Q41</span>Tree-shaking 是什么？怎么做才能让 Tree-shaking 生效？</div>
+  <div class="a"><strong>Tree-shaking = 移除未使用的代码。前提：ES Module 的静态 import/export。</strong><br><br>条件：1. 必须用 ES Module（CommonJS 的 require 是动态的，无法静态分析）。2. 必须开启 production mode（Webpack 的 mode: 'production'）。3. package.json 的 sideEffects: false——声明所有模块无副作用，可以安全删除。<br><br>坑：如果 sideEffects 没配置，Webpack 不敢删任何模块——怕"被删的模块虽然没导出，但执行时有副作用"。<br><br>你的 sky-monitor-sdk 用 tsup 打包，默认支持 CJS/ESM + tree-shaking。插件独立文件正是为了 tree-shaking——不需要 ReplayPlugin 的就不导入它。</div>
+</div>
+
+<div class="qa" id="q42">
+  <div class="q"><span class="num">Q42</span>首屏加载优化做过哪些？</div>
+  <div class="a"><strong>代码层面：</strong>路由懒加载（React.lazy + Suspense），组件按需加载（next/dynamic）。CodeTrail 里 Monaco Editor 2MB 不用 next/dynamic 懒加载的话，首屏直接炸。<br><strong>资源层面：</strong>图片 WebP 格式、字体子集化、CSS/JS 压缩、Gzip/Brotli。<br><strong>网络层面：</strong>CDN（Vercel 自带全球 CDN）、预加载关键资源（&lt;link rel="preload"&gt;）、HTTP/2 多路复用。<br><strong>构建层面：</strong>Code splitting（SplitChunksPlugin / Next.js 自动按路由分割）。<br><br>实际效果：CodeTrail 的 Lighthouse 得分 > 95。因为 SSG 纯静态 + CDN + Monaco 懒加载。</div>
+</div>
+
+<div class="qa" id="q43">
+  <div class="q"><span class="num">Q43</span>你怎么做跨域问题的？CORS 怎么配置？</div>
+  <div class="a"><strong>CORS：服务器设置响应头 Access-Control-Allow-Origin，告诉浏览器哪些域名可以跨域请求。</strong><br><br>预检请求（OPTIONS）：复杂请求（非 GET/POST、自定义 Header、Content-Type 非表单）会先发 OPTIONS 问服务器"我能这样调你吗"。<br><br>解决方案：1. 开发环境——Vite/Webpack devServer 配 proxy，把 /api 转发到后端。2. 生产环境——后端配 CORS 头或 Nginx 反向代理。3. 临时方案——JSONP（只支持 GET）、浏览器插件关掉跨域检查。<br><br>你的 Sky-Chat 里用 Next.js API Route 做 BFF 层——前端调 Next.js 的 /api/chat，Next.js 服务端调 DeepSeek。没有跨域问题。</div>
+</div>
+
+<div class="qa" id="q44">
+  <div class="q"><span class="num">Q44</span>Web 安全方面了解哪些？XSS、CSRF 怎么防？</div>
+  <div class="a"><strong>XSS（跨站脚本）：攻击者注入恶意 JS。</strong>防御：1. 输出转义——用户输入文本不进 innerHTML。2. CSP（Content Security Policy）限制脚本来源。3. HttpOnly Cookie——JS 读不到。<br><strong>CSRF（跨站请求伪造）：攻击者诱导用户点链接，借用用户登录态发请求。</strong>防御：1. SameSite Cookie（Strict/Lax）。2. CSRF Token——服务端生成 Token 嵌在表单里，提交时校验。3. Referer 校验。<br><br>你的 agent-notes 里做了 AI 输出的 rehype-sanitize 白名单过滤和 JWT HttpOnly Cookie——就是 XSS 防御。</div>
+</div>
+
+<div class="qa" id="q45">
+  <div class="q"><span class="num">Q45</span>CI/CD 了解吗？你的项目怎么部署的？</div>
+  <div class="a"><strong>CI（持续集成）：代码推送到仓库 → 自动跑 lint/test/build → 失败则阻止合并。</strong><br><strong>CD（持续部署）：CI 通过后自动部署到生产。</strong><br><br>我的项目：agent-notes 用 GitHub Pages——push main → GitHub Actions 自动 deploy。CodeTrail 用 Vercel——GitHub 关联项目，push main → Vercel 自动 build + deploy 到 CDN。<br><br>实习时的流程：本地开发 → git push feature 分支 → 提 MR → Leader code review → 合入 main → Jenkins 自动构建 → 部署到测试环境 → QA 验证 → 上线。</div>
+</div>
+
+<!-- ========== Lynx ========== -->
+<h2 id="lynx">七、Lynx 与跨端</h2>
+
+<div class="qa" id="q46">
+  <div class="q"><span class="num">Q46</span>Lynx 是什么？和 React Native 有什么区别？</div>
+  <div class="a"><strong>Lynx 是字节跳动自研的跨端框架——让前端开发者用 React 的思路写 Native 应用。</strong><br><br>和 React Native 的核心区别：1. Lynx 有自己的渲染引擎（不是 React Native 的 Yoga 布局引擎），针对字节的业务场景做了优化。2. Lynx 支持多线程渲染——主线程和渲染线程分离，减少 JS 线程阻塞对 UI 的影响。3. API 层更贴近字节内部生态。<br><br>本质上都是"前端声明式 UI + Native 渲染层"的思路——用 JS 写界面，框架翻译成 Native 组件。React/Vue 的组件化思想在跨端框架里是通用的。</div>
+</div>
+
+<div class="qa" id="q47">
+  <div class="q"><span class="num">Q47</span>如果让你用 Lynx 开发一个功能，从 React 切过来需要适应什么？</div>
+  <div class="a"><strong>1. 渲染模型变化：</strong>React 的 div/span 变成 Lynx 的 view/text/image——需要熟悉组件映射表。<br><strong>2. 布局系统：</strong>Flexbox 不变（跨端通用），但部分 CSS 不支持（如 grid、某些伪类）。<br><strong>3. 调试方式：</strong>有 Lynx DevTools——类似 React DevTools，查看组件树和性能。<br><strong>4. 性能心智模型：</strong>Native 端对列表渲染、图片加载、内存更敏感——虚拟列表不是优化选项，是必须。<br><br>但核心能力不变——Hooks 写法、单向数据流、组件拆分思路完全一致。我估计算法上的适应周期 1-2 周。</div>
+</div>
+
+<div class="qa" id="q48">
+  <div class="q"><span class="num">Q48</span>跨端开发的核心挑战是什么？你怎么理解"一套代码多端运行"？</div>
+  <div class="a"><strong>核心挑战不是"能跑起来"，而是"每个端都有原生体验"。</strong><br><br>真正的困难：1. 不同平台的交互范式——iOS 有滑动手势、Android 有返回键、Web 有 URL。一套代码很难同时适配。2. 性能差异——低端 Android 机的渲染性能和 iPhone 14 差 10 倍，代码要能在两者上都流畅。<br><br>我的理解："一套代码"不是"100% 代码共享"，而是<strong>业务逻辑共享 + UI 层按端适配</strong>。数据请求、状态管理、路由逻辑写一次，渲染层根据平台做差异化。<br><br>类似我 sky-monitor-sdk 的架构——核心采集逻辑共享，上报通道分 ESM/CJS/UMD。</div>
+</div>
+
+<!-- ========== 实习追问 ========== -->
+<h2 id="internship">八、实习经历追问</h2>
+
+<div class="qa" id="q49">
+  <div class="q"><span class="num">Q49</span>实习里最有挑战的一个需求是什么？怎么解决的？</div>
+  <div class="a"><strong>退货审核模块——6 种状态流转，每种状态的按钮、表单、权限都不一样。</strong><br><br>一开始我想写 6 个 if-else，Leader 说"后面加第 7 种状态怎么办"。他教我改用<strong>状态配置表</strong>——一个对象，key 是状态名，value 是{可操作按钮、可填字段、下一步流转}。加新状态只加一行配置。<br><br>这个思路后来我一直用——CodeTrail 的类型定义、Agent 的 routeTo 映射都是同一个思想。用数据驱动行为，而不是写死逻辑。</div>
+</div>
+
+<div class="qa" id="q50">
+  <div class="q"><span class="num">Q50</span>前端怎么和后端联调？遇到过什么问题？</div>
+  <div class="a"><strong>联调流程：后端出接口文档 → 前端 mock 数据先做 UI → 联调时发现字段名对不上 / 格式不一致 → 沟通修改。</strong><br><br>常见问题：1. 字段名不一致——后端叫 user_name，文档写 userName，发过来是 username。2. 返回格式——成功是 {data: ...}，失败是 {error: ...}，中间有一次 500 直接抛 HTML。3. 分页规范不统一——有的用 page/size，有的用 offset/limit。<br><br>解决：1. 第一时间看实际的 response，不要只看文档。2. 把所有状态码的返回体都测一遍（200/400/401/500）。3. 把不一致的反馈给后端统一——联调时容忍差异，代码里做适配层。</div>
+</div>
+
+<div class="qa" id="q51">
+  <div class="q"><span class="num">Q51</span>实习里有没有和产品/设计产生过冲突？怎么处理的？</div>
+  <div class="a"><strong>有过的不是冲突，是技术方案被质疑。</strong><br><br>做一个运营看板的数据导出功能时，产品要"实时生成 Excel 并下载"。我评估后发现 10 万条数据实时生成 Excel 会卡住页面 5-8 秒。我提了替代方案：后台异步生成 + 通知用户下载。产品一开始不接受，觉得"操作多了一步"。<br><br>我做了两件事：mock 了实时方案的实际延迟视频给他看，同时做了异步方案的 Demo。他看完说"原来会卡成这样"，接受了异步方案。这件事教会我——<strong>不要只说"技术上做不到"，要用数据或 demo 让对方理解为什么。</strong></div>
+</div>
+
+<div class="qa" id="q52">
+  <div class="q"><span class="num">Q52</span>实习里 code review 被提过什么问题？</div>
+  <div class="a"><strong>最大的一个是——变量命名太随意。</strong>有个函数叫 processData，Leader 说"你的队友看这个名字不知道它干什么"。后来养成了习惯：函数名必须是动词+名词描述动作——fetchUserOrders、validateReturnForm。<br><br>另外被说过 useEffect 依赖数组漏了，导致闭包陷阱。之后每次都开 React lint 规则检查。<br><br>还有一个——PR 太大，一个 MR 改了 800 行。Leader 说 review 不过来，让我拆成 3 个小 MR：重构 Hooks、加功能、修样式。之后的习惯：一个 MR 只做一件事。</div>
+</div>
+
+<div class="qa" id="q53">
+  <div class="q"><span class="num">Q53</span>你认为一个好的前端工程师需要具备什么？</div>
+  <div class="a">三个能力：<br><br><strong>1. 能从用户视角看问题。</strong>不是"这个组件写得漂亮"，而是"用户找商品费不费劲、一个操作要几步"。虚拟滚动不是因为技术炫，是运营反馈 5000 条商品卡。<br><br><strong>2. 知道什么不做比什么做更重要。</strong>实习里 Leader 拦了我好几次"这就够了不要过度设计"。功能跑起来是第一步，不该优化的不要提前优化。<br><br><strong>3. 沟通能力——能和非技术的同事说清楚技术问题。</strong>比如跟产品用 demo 而不是代码解释"为什么实时导出会卡"，跟后端用截图而不是口头说"这里字段名不对"。</div>
+</div>
+
+<div class="qa" id="q54">
+  <div class="q"><span class="num">Q54</span>为什么会选择前端？你对前端未来怎么看？</div>
+  <div class="a"><strong>前端是离用户最近的。后端改一个 Bug 用户无感，前端改一个按钮位置用户立刻发现。</strong><br><br>前端未来的两个大方向我看好：<br><br>1. AI + 前端——不只是用 Copilot 写代码，而是让前端应用内置 AI 能力。达人的带货文案生成、商品描述优化、用户智能推荐。前端从"画界面"变成"做智能体验"。这正好是我想做的方向。<br><br>2. 跨端大一统——Lynx/React Native/Flutter 在往同一个方向跑。未来的前端不会只写 Web，而是写一套代码适配小程序、App、Web。</div>
+</div>
+
+<div class="qa" id="q55">
+  <div class="q"><span class="num">Q55</span>如果实习期间遇到完全不熟悉的技术栈怎么办？</div>
+  <div class="a"><strong>先跑通最小 Demo，再看文档补齐细节。</strong><br><br>举个例子——实习里第一次用 ReactVirtuoso 做虚拟滚动。我不是先读完整 API 文档（200 页），而是找一个最简单的 demo 跑起来（30 行代码让列表滚动），看它行不行。行 → 再按需求定制——加 placeholder 高度、调 overscan 数量、适配不同行高。<br><br>学习方法：最小可行 → 需求驱动 → 有问题查文档，不看完整本再动手。这个套路适用所有新技术——包括 Lynx。</div>
+</div>
+
+</article>
+</div>
+
+<footer>
+  <p>面向字节跳动前端实习面试准备 · <a href="/agent-notes/">返回首页</a></p>
+  <p style="margin-top:8px"><a href="https://github.com/crimsonkingdde">GitHub</a> · <a href="/agent-notes/interview.html">Agent题库</a></p>
+</footer>
+
+</body>
+</html>
