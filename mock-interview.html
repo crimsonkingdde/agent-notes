@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字节跳动前端实习 — 模拟面试全复盘</title>
+<style>
+:root{--bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#c9d1d9;--text2:#8b949e;--accent:#58a6ff;--accent2:#f78166;--green:#3fb950;--warn:#d2991d}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.container{max-width:860px;margin:0 auto;padding:0 24px}
+header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+header .container{display:flex;align-items:center;justify-content:space-between}
+header .logo{font-size:20px;font-weight:700;color:#fff;text-decoration:none}
+header .logo span{color:var(--accent)}
+header nav{display:flex;align-items:center;gap:16px}
+header nav a{color:var(--text2);text-decoration:none;font-size:14px;transition:color .2s}
+header nav a:hover{color:var(--accent)}
+header nav a.active{color:var(--accent);font-weight:600}
+.hero{padding:50px 0 30px;text-align:center}
+.hero h1{font-size:28px;font-weight:800;color:#fff;margin-bottom:8px}
+.hero p{font-size:14px;color:var(--text2)}
+h2{font-size:20px;color:#fff;margin:48px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--accent)}
+h3{font-size:15px;color:var(--accent);margin:28px 0 8px}
+.section-intro{color:var(--text2);font-size:14px;margin-bottom:20px;font-style:italic}
+.intro-box{background:rgba(88,166,255,.08);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:16px 0}
+.intro-box .label{font-size:11px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.intro-box .text{font-size:14px;color:var(--text)}
+.qa{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin:16px 0}
+.qa .q{font-weight:700;font-size:14px;margin-bottom:10px;display:flex;gap:8px}
+.qa .q .num{color:var(--accent);min-width:20px}
+.qa .a{font-size:13px;line-height:1.8;padding-left:28px;color:var(--text2)}
+.qa .a strong{color:var(--accent2)}
+.qa .a em{color:var(--green);font-style:normal}
+.phase-header{background:var(--bg-card);border:1px solid var(--accent);border-radius:8px;padding:12px 18px;margin:28px 0 16px}
+.phase-header .phase-num{font-size:11px;color:var(--accent);text-transform:uppercase}
+.phase-header .phase-title{font-size:16px;color:#fff;font-weight:700;margin-top:2px}
+.key-point{display:inline-block;background:rgba(63,185,80,.15);color:var(--green);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-left:6px}
+footer{background:var(--bg-card);border-top:1px solid var(--border);padding:32px 0;text-align:center;color:var(--text2);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="/agent-notes/" class="logo">Agent<span>Notes</span></a>
+    <nav>
+      <a href="/agent-notes/">首页</a>
+      <a href="/agent-notes/interview.html">Agent题库</a>
+      <a href="/agent-notes/frontend-interview.html">前端题库</a>
+      <a href="/agent-notes/mock-interview.html" class="active">模拟面试</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+<section class="hero">
+  <h1>字节跳动前端实习 — 模拟面试全复盘</h1>
+  <p>资深面试官视角 · 分层连环追问 · 从自我介绍到技术深挖到行为面试 · 逐题含答案</p>
+</section>
+
+<!-- ==================== 一、自我介绍 ==================== -->
+<h2>一、开场自我介绍（带坑版话术 + 追问链）</h2>
+
+<div class="intro-box">
+  <div class="label">候选人话术（故意留白，引面试官追问）</div>
+  <div class="text">面试官好，我是李文尧，重邮计算机硕士。之前在成都迈达做过3个月前端实习，做电商后台的React、Vue业务优化；读研期间独立做了两个AI Agent全栈开源项目，主打多智能体、RAG和前端可视化，也投过一篇图大模型相关会议论文，平时会写技术博客沉淀项目经验。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q1</span>实习里主要做了哪些优化类工作？简单说下产出。</div>
+  <div class="a"><strong>四块：</strong>SKU组件从Class重构到Hooks，代码从600行降到300行并修复了规格重复选择bug；5000条商品列表做虚拟滚动，首屏耗时降75%；独立开发退货审核前端模块，覆盖6种状态流转，对接12个后端接口；参与Vue2到Vue3看板迁移，抽composable消除200行重复代码。每项都有具体产出数据。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q2</span>为什么自研Agent全栈项目，不直接用现有开源框架？</div>
+  <div class="a"><strong>开源框架（Dify/Coze）封装太高层</strong>——我需要在"工具执行完"和"返回结果"之间插Reflection评分和条件重试，它们的源码里没有这个钩子。LangGraph把每一步拆成独立节点，条件边做路由、循环边做重试，每一步消息拼接都在我控制范围内。快糙猛的开源框架给不了这种精细化控制。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q3</span>LangGraph这些偏AI工程的库，前端怎么和它们打通流式交互？</div>
+  <div class="a"><strong>BFF层 + SSE流式协议。</strong>Next.js API Route做中间层——接收前端fetch请求 → 调LangGraph的streamEvents()获取Token级输出 → 转成SSE事件流返回前端。前端useChat()自动解析SSE。LangChain/LanceDB这些Python库跑在后端，前端不直接调它们——通过Next.js API Route转发。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q4</span>本科机械臂缺陷检测项目，和Agent可视化有什么共通点？</div>
+  <div class="a"><strong>都是"把抽象数据变可视化"。</strong>机械臂那边我把传感器数据实时渲染成曲线图，CodeTrail我把Agent轨迹渲染成知识图谱。共通的核心能力是<strong>数据解析 → 状态管理 → 交互式渲染</strong>。无非一个是时序传感器数据，一个是Agent的tool_call链。渲染层不同（ECharts vs ReactFlow），但数据处理管道的思路是一样的。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q5</span>图基础大模型的研究，对你做RAG向量检索有没有启发？</div>
+  <div class="a"><strong>有的——图结构稀疏性和邻居聚合。</strong>论文里做图基础模型，核心是"怎样把一个节点的邻居信息压缩成向量表示"。RAG场景里类似的问题——一篇文档不是孤立的，它和同主题的其他文档有引用/关联关系。受启发在RAG召回后加了<strong>文档关联扩展</strong>——检索到一篇文档后，顺带召回它的关联文档。相当于图神经网络里的一阶邻居聚合。”</div>
+</div>
+
+<!-- ==================== 二、实习深挖 ==================== -->
+<h2>二、实习经历深挖（成都迈达科技）</h2>
+
+<h3>SKU组件重构</h3>
+
+<div class="qa">
+  <div class="q"><span class="num">Q6</span>原来Class组件的核心痛点是什么？单纯冗余还是有bug？</div>
+  <div class="a"><strong>有线上bug——规格值重复选择。</strong>用户选"红色+XL"然后换选"蓝色"，两个颜色都显示选中。排查发现是Class组件里setState层层嵌套，同一个规格值被push了两次。Class组件的问题是<strong>状态分散在多个生命周期里</strong>——componentDidMount初始化、componentDidUpdate同步——逻辑跳来跳去，排查一个bug要在四个方法里找。重构到Hooks后每个useHook管一块逻辑，bug路径一目了然。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q7</span>TS泛型具体约束了哪些边界？有没有遇到泛型复杂场景？</div>
+  <div class="a"><strong>约束了SKU属性键和值的类型关系。</strong>一个SKU的属性叫"颜色"，值必须是string[]；叫"尺寸"，值可以是string[]或number[]。用泛型约束——<code>useSpecState&lt;T extends Record&lt;string, string[] | number[]&gt;&gt;</code>，让传入的规格对象类型和值类型绑定。<br><br>遇到过一个复杂场景——颜色规格值里混了一个数字（接口返回数据不干净），TS编译期没拦住，运行时报错。解决：在Hook入口加了运行时校验——<strong>编译期泛型 + 运行时类型守卫</strong>双重保障。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q8</span>拆分自定义Hooks时，组件状态怎么在多个Hook间共享？</div>
+  <div class="a"><strong>不是让Hook之间互相传状态——是让组件把同一个state传给不同Hook。</strong>比如useSpecState管规格数据，useSpecLogic接收规格数据做组合校验。数据流是<strong>组件 → useSpecState(返回data) → 把data传给useSpecLogic</strong>，不是两个Hook内部通信。<br><br>也可以用useContext，但一个SKU组件内没必要——Context解决的是跨层级问题。两个Hook在同一个组件里，props传就够了。过度设计Context反而增加理解成本。”</div>
+</div>
+
+<h3>虚拟滚动优化</h3>
+
+<div class="qa">
+  <div class="q"><span class="num">Q9</span>除了虚拟滚动还试过什么？为什么选React Virtuoso？</div>
+  <div class="a"><strong>先试了分页——</strong>每页50条，用户翻页。但运营需要"一眼扫完所有商品找异常"，不接受翻页。<strong>然后试react-window——</strong>固定行高，但商品行的内容长度差异大，固定高度导致部分行被截断或浪费空间。ReactVirtuoso的<strong>动态行高</strong>解决了这个问题——不需要预知每行高度，自动测量。<br><br>ReactVirtuoso另外两个优势——自动补全滚动条、内置overscan（预渲染视口外N行，滚动不出白屏）。比react-window少写很多配置代码。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q10</span>React.memo浅对比，深层属性变化会不会失效？</div>
+  <div class="a"><strong>会。所以配合useMemo稳定对象引用。</strong>商品数据从接口拿到后，在父组件用useMemo对商品列表做稳定引用——列表不变就不重新创建数组。单个商品项也用useMemo包裹——只有当前商品真正被修改时才更新引用。memo浅对比的是引用，引用不变就跳过。<br><br>深层更新的场景（比如只改商品第3层的一个属性）→用<strong>Immer</strong>做不可变更新——自动生成新的引用链，memo能感知到变化。项目中没用Immer是因为更新粒度控制在第一层（删改商品整体替换），不需要深层更新。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q11</span>虚拟滚动白屏、滚动错位怎么处理？</div>
+  <div class="a"><strong>ReactVirtuoso默认处理了大部分——overscan预渲染上下N行，不会白屏。</strong><br><br>遇到过一个特殊case：某行内容特别长（商品描述500字），高度突增，滚动条突然变短，用户滚动位置计算错误。解决——<strong>预估行高</strong>：先渲染一版textContent截取的短内容估算高度，给一个最低行高，内容展开后自适应。Virtuoso用estimatedItemSize做默认行高预估。<br><br>如果react-window遇到这个场景会更麻烦——因为它依赖显式的行高数组，必须每行自己量。这也是当初选Virtuoso的原因。</div>
+</div>
+
+<h3>退货审核流程</h3>
+
+<div class="qa">
+  <div class="q"><span class="num">Q12</span>状态配置怎么设计的？有没有臃肿问题？</div>
+  <div class="a"><strong>用Record类型做配置表：</strong><code>Record&lt;Status, {buttons, fields, nextStatus, permission}&gt;</code>。每个状态定义：可操作按钮列表、可填字段、下一步流向、权限要求。加新状态加一行配置，组件代码不动。<br><br>当前6种状态没臃肿——但如果有20种状态确实会。Leader给的思路是"当配置表超过15行，拆成多个子配置表"——审批相关状态、上传相关状态分开管理。这个项目没到那一步但思路已经知道了。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q13</span>多级审批流转是前端控制还是后端返回？</div>
+  <div class="a"><strong>后端返回当前状态和可操作选项，前端做渲染。</strong>后端接口格式：<code>{currentStatus, availableActions[], nextStatusOptions[]}</code>。前端不存审批流规则——规则在后端。前端只负责把后端数据渲染成UI。<br><br>设计逻辑——审批规则是业务逻辑，放前端会有<strong>前后端不一致</strong>的风险。后端改了审批规则，前端如果硬编码就不同步。所以前端做"展示"，后端做"决策"。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q14</span>操作日志和凭证上传组件怎么解耦复用？</div>
+  <div class="a"><strong>抽了两个独立组件：UploadEvidence和OperationLog。</strong>各自接收props——UploadEvidence接收uploadUrl、acceptTypes、maxSize；OperationLog接收logList、renderItem。退货审核页面组合这两个组件。<br><br>后来另一个模块也需要凭证上传——直接import UploadEvidence，URL和文件类型一换就行。没有抽象成"通用组件库"（3个月实习来不及），但思路对了。</div>
+</div>
+
+<h3>Vue3迁移</h3>
+
+<div class="qa">
+  <div class="q"><span class="num">Q15</span>Vue2 Options API的复用痛点具体是什么？</div>
+  <div class="a"><strong>同一逻辑分散在不同Options里。</strong>ECharts初始化的代码在mounted里，resize逻辑在methods里，销毁在beforeDestroy里——三个地方跳来跳去。8个图表组件各写一遍，加起来200行重复。<br><br>Composition API把同一逻辑<strong>集中在一个composable函数</strong>里——useEChartsZoom、useEChartsResize、useEChartsTheme。一个composable管一件事情，哪个组件需要就import。这是Vue3最大的改变——不是语法糖，是编程思维从"按生命周期组织"变成"按逻辑组织"。”</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q16</span>ECharts composable里有没有this指向、内存泄漏问题？</div>
+  <div class="a"><strong>内存泄漏遇到过——</strong>组件卸载时ECharts实例没dispose。在Composition API的onUnmounted里加了<code>chart.dispose()</code>，但用ref存的实例引用没清除，导致GC回收不了。改成onUnmounted里同时dispose和置null。<br><br>this指向——Composition API里setup函数没有this，避免了Vue2里methods用箭头函数还是普通函数的纠结。这是加分项不是问题。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q17</span>迁移过程中兼容性问题最多出现在哪？怎么上线？</div>
+  <div class="a"><strong>Vue3的v-model变了——</strong>Vue2是<code>value + input</code>，Vue3是<code>modelValue + update:modelValue</code>。组件间的v-model全要改。还有Vue3移除了<code>$listeners</code>——事件监听机制变了。<br><br>上线策略——<strong>一次性替换，不做灰度。</strong>因为8个图表组件集中在一个看板页面，没有分散在多个页面。灰度没意义。替换前用截图对比工具逐个图表验证——新旧页面截图逐个像素对比，有差异立刻排查。验证完直接上线。</div>
+</div>
+
+<!-- ==================== 三、Agent学习助手 ==================== -->
+<h2>三、Agent学习助手深挖（核心亮点）</h2>
+
+<div class="qa">
+  <div class="q"><span class="num">Q18</span>StateGraph七层节点划分的依据是什么？合并部分节点会不会更简单？</div>
+  <div class="a"><strong>7节点 = 1(路由) + 5(执行) + 1(质检)。</strong><br><br>能合并——把"质检"合并到每个执行节点里，省一个节点。但不合并的理由：<strong>质检逻辑是跨场景通用的</strong>——concept、exam、code都需要同一套打分标准。如果分到5个节点里，改了打分规则要改5个地方。抽成独立reflect节点——一处改，全局生效。这是<strong>职责分离，不是过度设计</strong>。<br><br>能不能3个节点？把5个执行Agent合成1个——可以，但不同场景的System Prompt差异太大。concept要解释、exam要不给答案、code要写代码——合成一个节点靠if-else分支，Prompt越来越臃肿、LLM越容易出错。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q19</span>Reflection评分0.75这个阈值怎么定的？调优过吗？</div>
+  <div class="a"><strong>试出来的，不是算出来的。</strong>一开始设0.7——发现回答质量不稳定但都通过了，漏了很多差回答。调到0.85——太多好回答被退回重做，平均延迟增加2-3秒。<br><br>0.75是平衡点——50道测试题跑下来：0.75以上通过率73%，低于0.75退回后重做一轮提升到87%。<br><br>如果想做得更科学——不是拍一个固定阈值，而是<strong>按场景动态调整</strong>。exam场景答错代价高，阈值提到0.8。news场景时效性第一，阈值降到0.65。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q20</span>State/Context/Store三层怎么划分？会不会数据同步冲突？</div>
+  <div class="a"><strong>State：请求级动态数据——messages、routeTo、reflectionScore。Context：运行时静态配置——user_id、max_tool_calls、API Key。Store(Mem0)：跨会话持久化——用户知识掌握度。</strong><br><br>不会冲突——因为<strong>时序天然隔离</strong>。一次请求的流程：graph.invoke前从Store读已掌握知识写入State.memoryContext → 图执行过程中只读写State → 结束后根据reflectionScore更新Store。不是并发写同一个数据源。<br><br>把API Key放Context不放State的关键原因——State会被序列化到LangSmith Trace日志。如果API Key在State里→日志泄露→安全事件。Context通过configurable注入，不进序列化链路。”</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q21</span>RAG为什么用递归切分不用固定长度？父子文档检索有什么优势？</div>
+  <div class="a"><strong>固定长度500字一刀可能在"GRPO是"和"DeepSeek提出的算法"中间切断。</strong>后半段向量检索时完全对不上问题。递归切分按\n\n→\n→。→空格优先级找自然边界。<br><br>父子文档——<strong>小粒度建索引保证检索精度，大粒度返回保证上下文完整。</strong>检索时在子文档(300 token)层面，精确度更高；返回答案时通过parent_id展开父文档(2000 token)，给LLM完整上下文。<br><br>代价——存储翻倍（父子都要存）。但5篇文章翻倍也就10篇，不需要考虑。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q22</span>LanceDB是前端本地还是后端服务？</div>
+  <div class="a"><strong>后端——Node.js进程内磁盘文件。</strong>LanceDB是嵌入式的，npm install即用，读写本地磁盘的Lance格式文件。不需要额外启动服务。前端不直接连LanceDB——通过Next.js API Route做检索请求。<br><br>为什么选嵌入式——5篇文档不值得跑一个独立数据库服务。LanceDB数据量到10万条都不需要换。100万条以上的话换Qdrant或Milvus，通过云端服务或Docker部署。”</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q23</span>Mem0怎么区分临时对话和长期记忆？冲突检测怎么实现？</div>
+  <div class="a"><strong>Mem0的LLM自动从对话里提取"值得记住"的信息。</strong>不是说"我今晚吃火锅"就存——它是短期对话信息，不具备长期价值。LLM判断的是"这个信息在未来对话中会不会被用到"。<br><br>冲突检测——Mem0内部的去重引擎。用户先说我学过RAG→后来说我其实不懂RAG→Mem0检测到新信息和旧记忆"RAG已掌握"语义冲突→自动覆盖旧记忆。不是简单覆盖，是在向量库里找到语义最接近的旧记忆，对比判断是否需要更新。<br><br>如果自己用JSON文件手写这套逻辑——存储、语义检索、LLM自动提取、冲突检测——每个都要自己实现。Mem0把四个步骤都封好了。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q24</span>MCP三层错误处理分别对应什么场景？前端怎么收沙箱结果？</div>
+  <div class="a"><strong>第一层（工具内try-catch）：参数校验失败——文件不存在、命令格式错误。即时返回错误给Agent。</strong><br><strong>第二层（ToolNode raise_on_error=false）：工具函数抛异常——不中断整个图，把error转成结构化消息传给Agent。</strong><br><strong>第三层（条件边恢复路由）：连续3次失败→不再重试→降级回答或终止。</strong><br><br>前端不直接收沙箱结果——流是<strong>LangGraph → Next.js API Route → SSE → 前端</strong>。Docker沙箱执行完返回给MCP Server，MCP Server返回给Agent节点，Agent节点追加到State.messages，streamEvents推送给前端。中间有4-5层转发，前端无感知。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q25</span>前端buffer + requestAnimationFrame优化，不做优化会出现什么问题？</div>
+  <div class="a"><strong>流式chunk每20ms来一个，每个触发setState → 每秒50次渲染 → UI抖动。</strong><br><br>表现：打字机效果不流畅——文字不是丝滑出来的，是一跳一跳出现的。CPU占用高——React每次渲染都要跑diff+commit。<br><br>优化：buffer收集一段时间的chunk（50ms窗口），rAF批量刷新一次setState。渲染从50次/秒降到20次/秒，人眼看不出区别，但CPU空闲率高很多。这个思路和你Sky-Chat里用buffer+rAF优化流式渲染是一样的。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q26</span>LangSmith Trace前端怎么上报？</div>
+  <div class="a"><strong>前端不上报——LangSmith是后端LangGraph SDK内置的tracing。</strong>graph.invoke()时自动向LangSmith发Span数据。前端只展示结果——从LangSmith API拉Trace数据，渲染节点延迟和Token消耗。<br><br>Tracing是后端的责任——因为每个节点执行都在后端。前端只是消费方。如果前端要上报，是上报<strong>用户行为事件</strong>（搜索关键词、点击Agent场景、满意度评分），这些用自建埋点系统（GARUM等）而非LangSmith。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q27</span>大模型返回富文本有什么特殊XSS风险？rehype-sanitize怎么防？</div>
+  <div class="a"><strong>LLM输出的Markdown转HTML后可能包含恶意标签。</strong>普通XSS攻击来自用户输入——用户输入&lt;script&gt;。LLM的XSS风险不同——模型可能"学习"了恶意的Markdown模式，输出含事件处理器或危险标签。<br><br>rehype-sanitize做白名单过滤——只允许安全标签（p/h1/strong/code/ul/li/a）和属性（href/title/class），其他一律剥离。同时配置CSP头限制内联脚本来源。<br><br>Sky-Chat和agent-notes的Web界面都做了这一层。AI输出的安全性比用户输入更隐蔽——因为开发者潜意识觉得"LLM不会输出恶意内容"，但Prompt注入可以让LLM输出含攻击代码的内容。</div>
+</div>
+
+<!-- ==================== 四、CodeTrail ==================== -->
+<h2>四、CodeTrail 深挖</h2>
+
+<div class="qa">
+  <div class="q"><span class="num">Q28</span>为什么Zustand不用React Context+useReducer？</div>
+  <div class="a"><strong>Context变了所有消费者重渲染，Zustand精确订阅只更新用了当前字段的组件。</strong><br><br>播放引擎每500ms更新currentStep——Context方案会让整个Graph组件、Dashboard组件、Timeline组件统统重渲染。Zustand的usePlaybackStore(s => s.currentStep)只让Timeline和StepDetail更新。Dashboard和Graph因为订阅的是stats和steps（没变），不重渲染。<br><br>实测：同一场景下Context方案CPU占用高35%。这就是为什么Zustand被叫"高性能状态管理"。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q29</span>上万节点的图谱会不会卡？做了什么优化？</div>
+  <div class="a"><strong>dagre布局O(N^2 x L) + ReactFlow虚拟化 + useMemo缓存。</strong><br><br>实测：500节点以下流畅（dagre 12ms + 渲染60fps）。1000节点能接受（35ms/45fps）。5000节点开始感人（200ms/20fps）。10000节点明显卡顿（800ms/8fps）。<br><br>优化：1. dagre.layout()放useMemo——steps不变就不重算。2. ReactFlow onlyRenderVisibleElements——视口外节点不创建DOM。3. 节点data只传必要字段——不传整个原始对象。<br><br>更大的优化要做——Web Worker异步布局（不阻塞主线程）+ Canvas渲染替代DOM（Pixi.js）。当前100步轨迹够用，10000步场景没遇到过。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q30</span>tool_call关联文件节点是前端实时解析还是后端预处理？</div>
+  <div class="a"><strong>前端实时解析——在浏览器里跑的。</strong>graphBuilder用extractFilePath从toolInput里读filePath/path/file/pattern字段，创建文件节点和edge边。不需要后端预处理——因为trajectory.json已经是结构化数据了。<br><br>不用后端的原因——这工具是纯静态SSG部署在Vercel的，没有后端服务器。所有解析都在浏览器JS线程里。量大了会有性能问题（10000步parse要2-3秒）——加Web Worker异步解析就解决了。当前数据量不需要。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q31</span>tool_use和tool_result自洽校验，有哪些数据不匹配异常？</div>
+  <div class="a"><strong>1. tool_use.id在后续消息里找不到对应tool_result——可能数据采集时丢了。</strong><br><strong>2. tool_result.tool_use_id匹配到了，但content类型不匹配——tool_use是read_file，返回结果却是execute_command的格式。</strong><br><strong>3. 多个tool_result的tool_use_id指向同一个tool_use——数据重复。</strong><br><br>当前处理——解析器不校验，直接跳过。但Dashboard里统计"孤立调用"数量，标注团队看这个指标决定要不要质检。生产数据应该在上传环节做校验和拦截。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q32</span>unified diff parser手写有什么坑？</div>
+  <div class="a"><strong>坑1：hunk里"\ No newline at end of file"不是diff语法的一部分</strong>——是Git的提示信息，不能当变更行处理。<br><strong>坑2：空hunk——@@ -1,0 +1,0 @@</strong>——文件模式变更但内容不变，需要特殊处理。<br><strong>坑3：多文件diff——</strong>一个final_diff可能包含多个文件的变更。只展示了第一个文件，其他的忽略了。<br><br>最佳实践——生产级用npm: diff库的applyPatch，不手写。我手写是为了练习diff算法理解。就像HNSW自己写一遍也是学习。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q33</span>setInterval驱动回放，页面失焦时倍速错乱怎么处理？</div>
+  <div class="a"><strong>浏览器在非活跃标签页会降低setInterval频率——最小间隔被限制到1000ms。</strong>导致回放速度紊乱——1x的2s/步变成10s/步。<br><br>解决方案：监听<strong>visibilitychange</strong>事件——页面失焦时暂停播放，回到焦点恢复。或者用<strong>Web Worker的setInterval</strong>——Worker不在主线程，不受标签页失焦影响。当前用了visibilitychange方案——因为用户体验更好（失焦时不需要播放回放）。</div>
+</div>
+
+<!-- ==================== 五、学术/竞赛 ==================== -->
+<h2>五、学术、竞赛、证书追问</h2>
+
+<div class="qa">
+  <div class="q"><span class="num">Q34</span>论文的图谱向量化思路能迁移到RAG文档向量化吗？</div>
+  <div class="a"><strong>可以——图结构信息增强文本向量。</strong>论文里每个子图结构用一个向量表示——邻居节点的特征聚合后形成子图嵌入。RAG里一篇文档的Embedding如果只靠文本内容，忽略了它的上下文（被哪些文档引用、和哪些文档主题相近）。<br><br>用图增强——把知识库文档构造成k近邻图（每篇文档的向量检索最相似的5篇建边），用GNN聚合邻居信息丰富每篇文档的Embedding。检索时不仅能召回精确匹配，还能召回"图结构上相近"的相关文档。不过这个想法5篇文档场景用不上——文档太少，图结构提供不了额外信息。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q35</span>机械臂检测项目前端和视觉算法怎么联调？延迟问题？</div>
+  <div class="a"><strong>Python视觉算法通过HTTP接口暴露，前端调接口拿检测结果渲染。</strong>延迟有两层：视觉算法处理时间（300-800ms）+ 网络传输（50ms）。<br><br>前端做了两件事降低感知延迟：1. <strong>轮询转事件推送</strong>——不用前端每秒去问"好了没"，而是后端处理完主动推送（WebSocket）。2. <strong>流式结果展示</strong>——检测不是一次性完成，算法每识别出一个缺陷就推送一个结果，前端增量显示。<br><br>这个"轮询转推送"的思路后来在agent-notes的流式输出里也用了——SSE替代轮询。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q36</span>带学弟做科创竞赛，有没有团队需求分歧？</div>
+  <div class="a"><strong>有——前端想用React（因为我在学），后端想用Python Flask（因为他们只会Python）。</strong><br><br>解决的思路——不是argue技术选型，而是<strong>把"为什么选这个"翻译成"这样做对你有什么好处"</strong>。我说服后端的点：用Flask可以做REST API，前端用React调REST API，两者通过JSON松耦合，各写各的互不影响。如果前端也用Python模板渲染，前端改个按钮后端也要跑一遍——开发和调试都慢。<br><br>核心——<strong>技术选型的争论99%不是技术优劣，是各自舒适区的碰撞。把对方的收益说清楚比证明自己的技术好更有效。</strong></div>
+</div>
+
+<!-- ==================== 六、技术博客 ==================== -->
+<h2>六、技术博客与学习方法</h2>
+
+<div class="qa">
+  <div class="q"><span class="num">Q37</span>博客里哪个功能踩坑最多？</div>
+  <div class="a"><strong>LangSmith Trace的State序列化——三个坑。</strong><br><br>坑1：State里messages是数组，序列化到LangSmith时被截断（LangSmith有payload大小限制）。排查花了两天——因为Trace里messages字段消失了，但不是报错。<br>坑2：API Key放进State被序列化上去了。立即改了——放到Context的configurable里。<br>坑3：LangGraph JS SDK的streamEvents在特定版本有bug——on_chat_model_stream事件拿不到token。回退版本+提了GitHub issue。<br><br>这是所有问题里花时间最多的——因为不是"代码写错了"，而是"框架的边界行为没文档"。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q38</span>GitHub Pages + Vercel Serverless部署Agent Demo，流式接口跨域和冷启动怎么解决？</div>
+  <div class="a"><strong>跨域——Next.js API Route和前端同域，不存在跨域。</strong>代理DeepSeek调用的也是API Route——服务端到服务端调用。前端全走相对路径。<br><strong>冷启动——Serverless函数第一次调用时要加载整个LangGraph+依赖包。</strong>体感延迟2-3秒。解决方案：Vercel的Pro版有Warm Up功能——预先加载函数实例。免费版用cron job每分钟访问一次API保持热度。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q39</span>传统电商前端和AI Agent前端，开发思路上的最大区别？</div>
+  <div class="a"><strong>确定性 vs 不确定性。</strong><br><br>电商：数据模型确定——商品有name/price/status。UI确定——列表+表单+详情。接口确定——REST API，请求/响应格式固定。<br><br>AI Agent：LLM输出不确定——可能返回JSON也可能返回解释性文字。工具调用不确定——Agent先调哪个工具、调几次不可预知。UI需要适应——不是"一个表单三个字段"，而是"可能出3步也可能出15步的流式对话"。<br><br>所以AI前端需要<strong>状态机</strong>——管理Agent多阶段响应的状态转换（thinking→tool_calling→answering→done）。电商前端不需要。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q40</span>举一个你深挖底层源码的技术，讲下收获。</div>
+  <div class="a"><strong>HNSW——从头实现了一遍向量检索算法。</strong><br><br>收获最大的不是算法本身，而是理解了为什么检索系统是分层的——HNSW的层级图里，上层节点少（跳跃远），下层节点密（精确定位）。这和RAG的"向量粗排→精排"两阶段思路一致。<br><br>代码量约300行就能跑通基础版本。两个简化——selectNeighbors没做启发式剪枝（损失5%召回但代码量减半），删除节点后不回收索引空间（重建一次就好）。学完之后换成LanceDB生产使用——因为"写代码理解原理"和"用成熟库上生产"是两件事。</div>
+</div>
+
+<!-- ==================== 七、前端基础深挖 ==================== -->
+<h2>七、前端基础深挖（结合项目场景）</h2>
+
+<div class="qa">
+  <div class="q"><span class="num">Q41</span>useState闭包陷阱，你哪个项目踩过？</div>
+  <div class="a"><strong>CodeTrail 播放引擎。</strong>setInterval里nextStep读取currentStep——第一次渲染时闭包捕获的currentStep=0，后面永远是0。步骤不推进。<br><br>解决方案：不是把currentStep放进依赖数组（会导致频繁重建定时器），而是<strong>用函数式setState——setCurrentStep(prev => prev + 1)</strong>。函数式更新接收的是React内部最新的state值，不依赖闭包里的旧值。<br><br>本质：setInterval的闭包陷阱和useEffect的闭包陷阱是一样的——异步回调里拿到的变量是创建回调时的值。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q42</span>项目里用过哪些设计模式？手写单例。</div>
+  <div class="a"><strong>1. 单例模式</strong>——sky-monitor-sdk的MonitorSDK实例全局唯一。用ES Module的模块级变量实现——模块加载一次，变量只初始化一次。<br><strong>2. 发布订阅</strong>——SDK的插件系统。TracePlugin订阅"SSE事件"，SessionPlugin订阅"路由变化"，通过EventBus通信。<br><strong>3. 策略模式</strong>——退货审核的状态配置表。6种状态对应6种策略（按钮/表单/权限），不用if-else。<br><strong>4. 代理模式</strong>——Next.js API Route代理DeepSeek调用。<br><br>手写单例：<br><pre>class MonitorSDK {
+  private static instance: MonitorSDK
+  private constructor() {}
+  static getInstance() {
+    if (!this.instance) this.instance = new MonitorSDK()
+    return this.instance
+  }
+}</pre>TS的private constructor确保外部不能new。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q43</span>深拷贝在哪里用过？需要处理什么特殊类型？</div>
+  <div class="a"><strong>sky-monitor-sdk里做错误上报——把Error对象深拷贝后传走。</strong>直接JSON.stringify(new Error())返回{}——因为Error的message/stack是不可枚举属性。<br><br>处理方式：手动提取Error的name、message、stack到普通对象再序列化。Date用toISOString转字符串。循环引用用WeakMap记录已访问对象。<br><br>项目里不用完整深拷贝——因为上报数据是单向的，拷贝一次就不再更新。不需要Immer那种结构共享。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q44</span>防抖场景——RAG搜索框怎么防抖+中断请求保证最新结果？</div>
+  <div class="a"><strong>防抖+AbortController。</strong><br><br>用户快速输入→每个字符触发搜索→防抖等500ms没再输入才发请求。但如果用户在500ms内继续输入→前一个定时器被清除→新定时器启动。<br><br>AbortController解决"延迟响应覆盖新响应"：发请求时创建AbortController→下一次发请求时abort前一个。这样不管网络多慢，UI上显示的永远是最新搜索词的结果。<br><br>最佳方案组合：<strong>useRef存AbortController引用 + useEffect cleanup abort + 实际触发用防抖。</strong>三管齐下保证正确性。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q45</span>TypeScript的装饰器在项目里有用到吗？</div>
+  <div class="a"><strong>没用到——装饰器还在Stage 3，不推荐生产用。</strong><br><br>但在Nest.js里见到过（@Controller/@Get装饰器）。理解它的本质——函数即装饰器，接收类/方法/属性做增强。Angular的@Component最常见。<br><br>如果必须给一个使用场景——SDK插件的@Track装饰器。在方法上标注@Track('event_name')自动埋点。但当前SDK是手动调EventBus.send，比装饰器更可控。</div>
+</div>
+
+<!-- ==================== 八、求职动机 ==================== -->
+<h2>八、求职动机与职业规划</h2>
+
+<div class="qa">
+  <div class="q"><span class="num">Q46</span>为什么选字节前端实习？偏向通用业务还是AI大模型前端？</div>
+  <div class="a"><strong>两个都要——字节是唯一能同时满足的。</strong><br><br>字节前端体量大——抖音/电商/生活服务的前端挑战不是Demo项目能比的。我想把React/TS能力在真正的大流量用户场景下磨练。同时字节的AI投入国内前三——豆包/Cici/扣子/DataWind。前端+AI结合是明确的内部方向。<br><br>我不怕分到传统React业务——因为基础不扎实，AI玩不好。传统业务的前端工程化（CI/CD/灰度/监控）是必须的——我实习只碰了一小块。业务能力+AI视野都到位才算真的全栈前端。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q47</span>如果入职后分配纯传统React业务接触不到Agent，怎么平衡？</div>
+  <div class="a"><strong>传统业务也有AI切入点——不需要专门做Agent项目才是AI。</strong><br><br>比如运营平台的管理后台——可以做AI智能搜索（自然语言查数据）、智能表单填写（AI根据历史数据预填）、数据看板的AI异常检测（自动标注数据波动原因）。这些都是"在现有业务里嵌入AI能力"，不需要新建一个Agent项目。<br><br>退一步说——8小时内把业务做到极致（code review无冗余、单元测试覆盖全），8小时外继续开源项目。一个成熟工程师的节奏——不是靠公司安排的技术栈成长，是靠自己。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q48</span>前端同时掌握AI工程能力的核心竞争力体现在哪里？</div>
+  <div class="a"><strong>能独立打通"前端UI → 后端AI能力 → 部署"全链路。</strong><br><br>纯前端——写一个对话界面，后端AI调不通。纯AI——LangGraph跑通了，但不知道怎么流式展示给用户。全栈——Next.js API Route管后端LLM调用+LangGraph编排，前端管流式渲染和状态机，自己一个人把"AI想法"变成"在线产品"。<br><br>这不是"什么都会一点"，是"前端为主、AI工程为辅、全栈兜底"的T型能力。字节想要的正是这种人——不只是写UI，而是理解整个链路。</div>
+</div>
+
+<div class="qa">
+  <div class="q"><span class="num">Q49</span>实习结束后长期技术规划？</div>
+  <div class="a"><strong>三阶段：</strong><br><br>短期（1年）——在前端基础深耕：React性能优化、TypeScript工程化、大型项目架构。把"能写出AI项目"升级到"能在大流量场景做好前端"。<br><br>中期（2-3年）——从"前端+AI"变成"AI Native前端"。不是"前端里嵌AI功能"，而是"用AI驱动前端开发"——AI生成UI、AI自动测试、AI性能优化。这个方向字节有天然场景。<br><br>长期——不给自己设限。可能往AI Agent工程方向走，也可能深耕前端架构。取决于两年后行业怎么变。保持学习能力比提前规划5年更实用。</div>
+</div>
+
+</div>
+
+<footer>
+  <p>字节跳动前端实习模拟面试 · <a href="/agent-notes/">返回首页</a></p>
+  <p style="margin-top:8px"><a href="https://github.com/crimsonkingdde">GitHub</a> · <a href="/agent-notes/interview.html">Agent题库</a> · <a href="/agent-notes/frontend-interview.html">前端题库</a></p>
+</footer>
+
+</body>
+</html>
